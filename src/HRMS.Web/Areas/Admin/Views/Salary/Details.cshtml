@@ -1,0 +1,162 @@
+@model HRMS.Application.DTOs.Salary.SalaryDto
+@{
+    ViewData["Title"] = "Salary Details";
+}
+
+<div class="row mb-3">
+    <div class="col-md-8">
+        <h2><i class="bi bi-cash-stack"></i> Salary Details</h2>
+    </div>
+    <div class="col-md-4 text-end">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+            <i class="bi bi-pencil"></i> Edit
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-person"></i> Employee Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Employee Code:</strong></div>
+                    <div class="col-md-8">@Model.EmployeeCode</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Employee Name:</strong></div>
+                    <div class="col-md-8">@Model.EmployeeName</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Effective From:</strong></div>
+                    <div class="col-md-8">@Model.EffectiveFrom.ToString("dd MMM yyyy")</div>
+                </div>
+                @if (Model.EffectiveTo.HasValue)
+                {
+                    <div class="row mb-2">
+                        <div class="col-md-4"><strong>Effective To:</strong></div>
+                        <div class="col-md-8">@Model.EffectiveTo.Value.ToString("dd MMM yyyy")</div>
+                    </div>
+                }
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Status:</strong></div>
+                    <div class="col-md-8">
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Inactive</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Earnings</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <td>Basic Salary</td>
+                        <td class="text-end"><strong>₹@Model.BasicSalary.ToString("N2")</strong></td>
+                    </tr>
+                    <tr>
+                        <td>HRA</td>
+                        <td class="text-end">₹@Model.HRA.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>Conveyance Allowance</td>
+                        <td class="text-end">₹@Model.ConveyanceAllowance.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>Medical Allowance</td>
+                        <td class="text-end">₹@Model.MedicalAllowance.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>Special Allowance</td>
+                        <td class="text-end">₹@Model.SpecialAllowance.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>Other Allowances</td>
+                        <td class="text-end">₹@Model.OtherAllowances.ToString("N2")</td>
+                    </tr>
+                    <tr class="table-success">
+                        <td><strong>Gross Salary</strong></td>
+                        <td class="text-end"><strong>₹@Model.GrossSalary.ToString("N2")</strong></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-dash-circle"></i> Deductions</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <td>PF (Provident Fund)</td>
+                        <td class="text-end">₹@Model.PF.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>ESI</td>
+                        <td class="text-end">₹@Model.ESI.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>Professional Tax</td>
+                        <td class="text-end">₹@Model.ProfessionalTax.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>TDS</td>
+                        <td class="text-end">₹@Model.TDS.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>Other Deductions</td>
+                        <td class="text-end">₹@Model.OtherDeductions.ToString("N2")</td>
+                    </tr>
+                    <tr class="table-danger">
+                        <td><strong>Total Deductions</strong></td>
+                        <td class="text-end"><strong>₹@Model.TotalDeductions.ToString("N2")</strong></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-3 bg-light">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Cost to Company (CTC)</h6>
+                <h2 class="text-info">₹@Model.CTC.ToString("N2")</h2>
+                <hr />
+                <h6 class="text-muted">Net Salary (Take Home)</h6>
+                <h2 class="text-success">₹@Model.NetSalary.ToString("N2")</h2>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Audit Info</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Created On:</small><br />
+                    <strong>@Model.CreatedOn.ToString("dd MMM yyyy HH:mm")</strong>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Created By:</small><br />
+                    <strong>@Model.CreatedBy</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

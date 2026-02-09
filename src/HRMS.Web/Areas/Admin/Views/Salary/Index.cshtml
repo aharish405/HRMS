@@ -1,0 +1,93 @@
+@model IEnumerable<HRMS.Application.DTOs.Salary.SalaryDto>
+@{
+    ViewData["Title"] = "Salary Management";
+}
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <h2><i class="bi bi-cash-stack"></i> Salary Management</h2>
+    </div>
+    <div class="col-md-6 text-end">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Assign Salary
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Basic Salary</th>
+                            <th>Gross Salary</th>
+                            <th>Deductions</th>
+                            <th>Net Salary</th>
+                            <th>CTC</th>
+                            <th>Effective From</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var salary in Model.Where(s => s.IsActive))
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@salary.EmployeeCode</strong><br />
+                                    <small>@salary.EmployeeName</small>
+                                </td>
+                                <td>₹@salary.BasicSalary.ToString("N2")</td>
+                                <td>₹@salary.GrossSalary.ToString("N2")</td>
+                                <td>₹@salary.TotalDeductions.ToString("N2")</td>
+                                <td><strong>₹@salary.NetSalary.ToString("N2")</strong></td>
+                                <td><span class="badge bg-info">₹@salary.CTC.ToString("N2")</span></td>
+                                <td>@salary.EffectiveFrom.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    @if (salary.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Details" asp-route-id="@salary.Id" class="btn btn-outline-info"
+                                            title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@salary.Id" class="btn btn-outline-primary"
+                                            title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-action="History" asp-route-employeeId="@salary.EmployeeId"
+                                            class="btn btn-outline-secondary" title="History">
+                                            <i class="bi bi-clock-history"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                <p class="mt-2">No salaries assigned yet</p>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Assign First Salary
+                </a>
+            </div>
+        }
+    </div>
+</div>

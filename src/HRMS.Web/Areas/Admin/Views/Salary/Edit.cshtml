@@ -1,0 +1,208 @@
+@model HRMS.Application.DTOs.Salary.CreateSalaryDto
+@{
+    ViewData["Title"] = "Edit Salary";
+    var salaryId = ViewBag.SalaryId;
+}
+
+<div class="row">
+    <div class="col-md-10">
+        <h2><i class="bi bi-pencil"></i> Edit Salary</h2>
+        <hr />
+
+        <form asp-action="Edit" asp-route-id="@salaryId" method="post" id="salaryForm">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-person"></i> Employee & Dates</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="EmployeeId" class="form-label">Employee</label>
+                        <select asp-for="EmployeeId" class="form-select" asp-items="ViewBag.Employees" disabled>
+                            <option value="">-- Select Employee --</option>
+                        </select>
+                        <input type="hidden" asp-for="EmployeeId" />
+                        <span asp-validation-for="EmployeeId" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="EffectiveFrom" class="form-label">Effective From</label>
+                            <input asp-for="EffectiveFrom" class="form-control" type="date" />
+                            <span asp-validation-for="EffectiveFrom" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="EffectiveTo" class="form-label">Effective To (Optional)</label>
+                            <input asp-for="EffectiveTo" class="form-control" type="date" />
+                            <span asp-validation-for="EffectiveTo" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Earnings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="BasicSalary" class="form-label">Basic Salary</label>
+                            <input asp-for="BasicSalary" class="form-control salary-input" type="number" step="0.01" />
+                            <span asp-validation-for="BasicSalary" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="HRA" class="form-label">HRA</label>
+                            <input asp-for="HRA" class="form-control salary-input" type="number" step="0.01" />
+                            <span asp-validation-for="HRA" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ConveyanceAllowance" class="form-label">Conveyance Allowance</label>
+                            <input asp-for="ConveyanceAllowance" class="form-control salary-input" type="number"
+                                step="0.01" />
+                            <span asp-validation-for="ConveyanceAllowance" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="MedicalAllowance" class="form-label">Medical Allowance</label>
+                            <input asp-for="MedicalAllowance" class="form-control salary-input" type="number"
+                                step="0.01" />
+                            <span asp-validation-for="MedicalAllowance" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="SpecialAllowance" class="form-label">Special Allowance</label>
+                            <input asp-for="SpecialAllowance" class="form-control salary-input" type="number"
+                                step="0.01" />
+                            <span asp-validation-for="SpecialAllowance" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="OtherAllowances" class="form-label">Other Allowances</label>
+                            <input asp-for="OtherAllowances" class="form-control salary-input" type="number"
+                                step="0.01" />
+                            <span asp-validation-for="OtherAllowances" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>Gross Salary:</strong> ₹<span id="grossSalary">0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-dash-circle"></i> Deductions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PF" class="form-label">PF</label>
+                            <input asp-for="PF" class="form-control deduction-input" type="number" step="0.01" />
+                            <span asp-validation-for="PF" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ESI" class="form-label">ESI</label>
+                            <input asp-for="ESI" class="form-control deduction-input" type="number" step="0.01" />
+                            <span asp-validation-for="ESI" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ProfessionalTax" class="form-label">Professional Tax</label>
+                            <input asp-for="ProfessionalTax" class="form-control deduction-input" type="number"
+                                step="0.01" />
+                            <span asp-validation-for="ProfessionalTax" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TDS" class="form-label">TDS</label>
+                            <input asp-for="TDS" class="form-control deduction-input" type="number" step="0.01" />
+                            <span asp-validation-for="TDS" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="OtherDeductions" class="form-label">Other Deductions</label>
+                        <input asp-for="OtherDeductions" class="form-control deduction-input" type="number"
+                            step="0.01" />
+                        <span asp-validation-for="OtherDeductions" class="text-danger"></span>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <strong>Total Deductions:</strong> ₹<span id="totalDeductions">0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3 bg-light">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h5>Gross Salary</h5>
+                            <h3 class="text-success">₹<span id="grossSalaryFinal">0.00</span></h3>
+                        </div>
+                        <div class="col-md-4">
+                            <h5>Total Deductions</h5>
+                            <h3 class="text-danger">₹<span id="totalDeductionsFinal">0.00</span></h3>
+                        </div>
+                        <div class="col-md-4">
+                            <h5>Net Salary</h5>
+                            <h3 class="text-primary">₹<span id="netSalary">0.00</span></h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-check-circle"></i> Update Salary
+                </button>
+                <a asp-action="Index" class="btn btn-secondary btn-lg">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            function calculateSalary() {
+                var basicSalary = parseFloat($('#BasicSalary').val()) || 0;
+                var hra = parseFloat($('#HRA').val()) || 0;
+                var conveyance = parseFloat($('#ConveyanceAllowance').val()) || 0;
+                var medical = parseFloat($('#MedicalAllowance').val()) || 0;
+                var special = parseFloat($('#SpecialAllowance').val()) || 0;
+                var other = parseFloat($('#OtherAllowances').val()) || 0;
+
+                var grossSalary = basicSalary + hra + conveyance + medical + special + other;
+
+                var pf = parseFloat($('#PF').val()) || 0;
+                var esi = parseFloat($('#ESI').val()) || 0;
+                var pt = parseFloat($('#ProfessionalTax').val()) || 0;
+                var tds = parseFloat($('#TDS').val()) || 0;
+                var otherDed = parseFloat($('#OtherDeductions').val()) || 0;
+
+                var totalDeductions = pf + esi + pt + tds + otherDed;
+                var netSalary = grossSalary - totalDeductions;
+
+                $('#grossSalary').text(grossSalary.toFixed(2));
+                $('#grossSalaryFinal').text(grossSalary.toFixed(2));
+                $('#totalDeductions').text(totalDeductions.toFixed(2));
+                $('#totalDeductionsFinal').text(totalDeductions.toFixed(2));
+                $('#netSalary').text(netSalary.toFixed(2));
+            }
+
+            $('.salary-input, .deduction-input').on('input', calculateSalary);
+            calculateSalary();
+        });
+    </script>
+}
