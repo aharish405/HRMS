@@ -110,7 +110,8 @@ public class OfferLetterController : Controller
         _logger.LogInformation("Generated PDF size: {Size} bytes for Offer Letter {ID}", pdfResult.Data!.Length, id);
 
         var stream = new MemoryStream(pdfResult.Data!);
-        return File(stream, "application/pdf", fileName);
+        Response.Headers.Append("Content-Disposition", $"attachment; filename={fileName}");
+        return File(stream, "application/octet-stream", fileName);
     }
 
     [HttpPost]
