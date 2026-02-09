@@ -1,0 +1,105 @@
+@model IEnumerable<HRMS.Application.DTOs.Designation.DesignationDto>
+@{
+    ViewData["Title"] = "Designations";
+}
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <h2><i class="bi bi-award"></i> Designations</h2>
+    </div>
+    <div class="col-md-6 text-end">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add Designation
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Level</th>
+                                <th>Employees</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var desig in Model.OrderBy(d => d.Level))
+                        {
+                                    <tr>
+                                        <td><strong>@desig.Code</strong></td>
+                                        <td>@desig.Title</td>
+                                        <td>@(desig.Description ?? "-")</td>
+                                        <td><span class="badge bg-primary">Level @desig.Level</span></td>
+                                        <td><span class="badge bg-info">@desig.EmployeeCount</span></td>
+                                        <td>
+                                    @if (desig.IsActive)
+                                    {
+                                                    <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                                    <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a asp-action="Edit" asp-route-id="@desig.Id" class="btn btn-outline-primary" title="Edit">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal@(desig.Id)" title="Delete">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+
+                                            <!-- Delete Modal -->
+                                            <div class="modal fade" id="deleteModal@(desig.Id)" tabindex="-1">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Confirm Delete</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            Are you sure you want to delete designation <strong>@desig.Title</strong>?
+                                                    @if (desig.EmployeeCount > 0)
+                                                    {
+                                                                    <div class="alert alert-warning mt-2">
+                                                                        <i class="bi bi-exclamation-triangle"></i> This designation has @desig.EmployeeCount employee(s) assigned.
+                                                                    </div>
+                                                    }
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                            <form asp-action="Delete" asp-route-id="@desig.Id" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+        }
+        else
+        {
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                    <p class="mt-2">No designations found</p>
+                </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,103 @@
+@model IEnumerable<HRMS.Application.DTOs.Department.DepartmentDto>
+@{
+    ViewData["Title"] = "Departments";
+}
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <h2><i class="bi bi-building"></i> Departments</h2>
+    </div>
+    <div class="col-md-6 text-end">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add Department
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Employees</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var dept in Model)
+                        {
+                            <tr>
+                                <td><strong>@dept.Code</strong></td>
+                                <td>@dept.Name</td>
+                                <td>@(dept.Description ?? "-")</td>
+                                <td><span class="badge bg-info">@dept.EmployeeCount</span></td>
+                                <td>
+                                    @if (dept.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Edit" asp-route-id="@dept.Id" class="btn btn-outline-primary" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal@(dept.Id)" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" id="deleteModal@(dept.Id)" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Confirm Delete</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to delete department <strong>@dept.Name</strong>?
+                                                    @if (dept.EmployeeCount > 0)
+                                                    {
+                                                        <div class="alert alert-warning mt-2">
+                                                            <i class="bi bi-exclamation-triangle"></i> This department has @dept.EmployeeCount employee(s) assigned.
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form asp-action="Delete" asp-route-id="@dept.Id" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                <p class="mt-2">No departments found</p>
+            </div>
+        }
+    </div>
+</div>

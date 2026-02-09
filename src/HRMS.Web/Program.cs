@@ -62,6 +62,13 @@ builder.Services.ConfigureApplicationCookie(options =>
 // Register repositories and services
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+// Register AutoMapper
+builder.Services.AddAutoMapper(typeof(HRMS.Application.Mappings.EmployeeProfile));
+
+// Register Application Services
+builder.Services.AddScoped<HRMS.Application.Interfaces.IEmployeeService, HRMS.Application.Services.EmployeeService>();
+builder.Services.AddScoped<HRMS.Application.Interfaces.IMasterDataService, HRMS.Application.Services.MasterDataService>();
+
 // Configure Authorization Policies
 builder.Services.AddAuthorization(options =>
 {
