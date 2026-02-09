@@ -8,7 +8,7 @@
         <h2><i class="bi bi-file-earmark-text"></i> Offer Letter Details</h2>
     </div>
     <div class="col-md-4 text-end">
-        <form asp-action="DownloadPdf" method="get" class="d-inline">
+        <form asp-action="DownloadPdf" method="get" class="d-inline" target="_blank">
             <input type="hidden" name="id" value="@Model.Id" />
             <button type="submit" class="btn btn-success">
                 <i class="bi bi-download"></i> Download PDF
@@ -163,7 +163,7 @@
                     </select>
                     <button type="submit" class="btn btn-primary w-100">Update Status</button>
                 </form>
-                <form asp-action="DownloadPdf" method="get" class="w-100">
+                <form asp-action="DownloadPdf" method="get" class="w-100" target="_blank">
                     <input type="hidden" name="id" value="@Model.Id" />
                     <button type="submit" class="btn btn-success w-100">
                         <i class="bi bi-file-pdf"></i> Download PDF
