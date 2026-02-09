@@ -89,25 +89,32 @@ public class OfferLetterController : Controller
 
     public async Task<IActionResult> DownloadPdf(int id)
     {
-        var result = await _offerLetterService.GenerateOfferLetterPdfAsync(id);
-
-        if (!result.Success)
+        var offerLetterResult = await _offerLetterService.GetOfferLetterByIdAsync(id);
+        if (!offerLetterResult.Success)
         {
-            TempData["ErrorMessage"] = result.Message;
+            TempData["ErrorMessage"] = "Offer letter not found";
             return RedirectToAction(nameof(Index));
         }
 
-        var offerLetterResult = await _offerLetterService.GetOfferLetterByIdAsync(id);
-        var fileName = $"OfferLetter_{offerLetterResult.Data!.CandidateName.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd}.pdf";
+        var pdfResult = await _offerLetterService.GenerateOfferLetterPdfAsync(id);
 
-        return File(result.Data!, "application/pdf", fileName);
+        if (!pdfResult.Success)
+        {
+            TempData["ErrorMessage"] = pdfResult.Message;
+            return RedirectToAction(nameof(Index));
+        }
+
+        var offerLetter = offerLetterResult.Data!;
+        var fileName = $"OfferLetter_{offerLetter.CandidateName.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd}.pdf";
+
+        return File(pdfResult.Data!, "application/pdf", fileName);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdateStatus(int id, OfferLetterStatus status)
+    public async Task<IActionResult> UpdateStatus(int id, int status)
     {
-        var result = await _offerLetterService.UpdateOfferLetterStatusAsync(id, status, User.Identity!.Name!);
+        var result = await _offerLetterService.UpdateOfferLetterStatusAsync(id, (OfferLetterStatus)status, User.Identity!.Name!);
 
         if (!result.Success)
         {
