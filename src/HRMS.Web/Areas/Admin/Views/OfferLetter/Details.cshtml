@@ -1,0 +1,185 @@
+@model HRMS.Application.DTOs.OfferLetter.OfferLetterDto
+@{
+    ViewData["Title"] = "Offer Letter Details";
+}
+
+<div class="row mb-3">
+    <div class="col-md-8">
+        <h2><i class="bi bi-file-earmark-text"></i> Offer Letter Details</h2>
+    </div>
+    <div class="col-md-4 text-end">
+        <a asp-action="DownloadPdf" asp-route-id="@Model.Id" class="btn btn-success">
+            <i class="bi bi-download"></i> Download PDF
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-person"></i> Candidate Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Name:</strong></div>
+                    <div class="col-md-8">@Model.CandidateName</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Email:</strong></div>
+                    <div class="col-md-8">@Model.CandidateEmail</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Phone:</strong></div>
+                    <div class="col-md-8">@Model.CandidatePhone</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Address:</strong></div>
+                    <div class="col-md-8">@Model.CandidateAddress</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-briefcase"></i> Position Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Designation:</strong></div>
+                    <div class="col-md-8">@Model.DesignationTitle</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Department:</strong></div>
+                    <div class="col-md-8">@Model.DepartmentName</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Location:</strong></div>
+                    <div class="col-md-8">@Model.Location</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Joining Date:</strong></div>
+                    <div class="col-md-8">@Model.JoiningDate.ToString("dd MMMM yyyy")</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-currency-rupee"></i> Compensation Details</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <td>Basic Salary</td>
+                        <td class="text-end"><strong>₹@Model.BasicSalary.ToString("N2")</strong></td>
+                    </tr>
+                    <tr>
+                        <td>HRA</td>
+                        <td class="text-end">₹@Model.HRA.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>Conveyance Allowance</td>
+                        <td class="text-end">₹@Model.ConveyanceAllowance.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>Medical Allowance</td>
+                        <td class="text-end">₹@Model.MedicalAllowance.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>Special Allowance</td>
+                        <td class="text-end">₹@Model.SpecialAllowance.ToString("N2")</td>
+                    </tr>
+                    @if (Model.OtherAllowances > 0)
+                    {
+                        <tr>
+                            <td>Other Allowances</td>
+                            <td class="text-end">₹@Model.OtherAllowances.ToString("N2")</td>
+                        </tr>
+                    }
+                    <tr class="table-success">
+                        <td><strong>Total Annual CTC</strong></td>
+                        <td class="text-end"><strong>₹@Model.CTC.ToString("N2")</strong></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.AdditionalTerms))
+        {
+            <div class="card mb-3">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-file-text"></i> Additional Terms</h5>
+                </div>
+                <div class="card-body">
+                    <p>@Model.AdditionalTerms</p>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Status</h5>
+            </div>
+            <div class="card-body text-center">
+                <h3>
+                    @switch (Model.Status.ToString())
+                    {
+                        case "Draft":
+                            <span class="badge bg-secondary">Draft</span>
+                            break;
+                        case "Sent":
+                            <span class="badge bg-info">Sent</span>
+                            break;
+                        case "Accepted":
+                            <span class="badge bg-success">Accepted</span>
+                            break;
+                        case "Rejected":
+                            <span class="badge bg-danger">Rejected</span>
+                            break;
+                        case "Withdrawn":
+                            <span class="badge bg-warning">Withdrawn</span>
+                            break;
+                    }
+                </h3>
+                <hr />
+                <form asp-action="UpdateStatus" method="post" class="mb-2">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <select name="status" class="form-select mb-2">
+                        <option value="">-- Update Status --</option>
+                        <option value="1">Draft</option>
+                        <option value="2">Sent</option>
+                        <option value="3">Accepted</option>
+                        <option value="4">Rejected</option>
+                        <option value="5">Withdrawn</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary w-100">Update Status</button>
+                </form>
+                <a asp-action="DownloadPdf" asp-route-id="@Model.Id" class="btn btn-success w-100">
+                    <i class="bi bi-file-pdf"></i> Download PDF
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Metadata</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Generated On:</small><br />
+                    <strong>@Model.GeneratedOn.ToString("dd MMM yyyy HH:mm")</strong>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Generated By:</small><br />
+                    <strong>@Model.GeneratedBy</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

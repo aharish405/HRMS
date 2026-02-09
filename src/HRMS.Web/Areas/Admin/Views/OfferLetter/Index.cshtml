@@ -1,0 +1,95 @@
+@model IEnumerable<HRMS.Application.DTOs.OfferLetter.OfferLetterDto>
+@{
+    ViewData["Title"] = "Offer Letters";
+}
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <h2><i class="bi bi-file-earmark-text"></i> Offer Letters</h2>
+    </div>
+    <div class="col-md-6 text-end">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Create Offer Letter
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Candidate</th>
+                            <th>Position</th>
+                            <th>Department</th>
+                            <th>CTC</th>
+                            <th>Joining Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var offer in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@offer.CandidateName</strong><br />
+                                    <small>@offer.CandidateEmail</small>
+                                </td>
+                                <td>@offer.DesignationTitle</td>
+                                <td>@offer.DepartmentName</td>
+                                <td><strong>₹@offer.CTC.ToString("N2")</strong></td>
+                                <td>@offer.JoiningDate.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    @switch (offer.Status.ToString())
+                                    {
+                                        case "Draft":
+                                            <span class="badge bg-secondary">Draft</span>
+                                            break;
+                                        case "Sent":
+                                            <span class="badge bg-info">Sent</span>
+                                            break;
+                                        case "Accepted":
+                                            <span class="badge bg-success">Accepted</span>
+                                            break;
+                                        case "Rejected":
+                                            <span class="badge bg-danger">Rejected</span>
+                                            break;
+                                        case "Withdrawn":
+                                            <span class="badge bg-warning">Withdrawn</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Details" asp-route-id="@offer.Id" class="btn btn-outline-info"
+                                            title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-action="DownloadPdf" asp-route-id="@offer.Id" class="btn btn-outline-success"
+                                            title="Download PDF">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                <p class="mt-2">No offer letters found</p>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Create Offer Letter
+                </a>
+            </div>
+        }
+    </div>
+</div>

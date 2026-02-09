@@ -1,0 +1,175 @@
+@model HRMS.Application.DTOs.OfferLetter.CreateOfferLetterDto
+@{
+    ViewData["Title"] = "Create Offer Letter";
+}
+
+<div class="row">
+    <div class="col-md-10">
+        <h2><i class="bi bi-file-earmark-text"></i> Create Offer Letter</h2>
+        <hr />
+
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-person"></i> Candidate Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="CandidateName" class="form-label">Full Name</label>
+                            <input asp-for="CandidateName" class="form-control" />
+                            <span asp-validation-for="CandidateName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="CandidateEmail" class="form-label">Email</label>
+                            <input asp-for="CandidateEmail" type="email" class="form-control" />
+                            <span asp-validation-for="CandidateEmail" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="CandidatePhone" class="form-label">Phone</label>
+                            <input asp-for="CandidatePhone" class="form-control" />
+                            <span asp-validation-for="CandidatePhone" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="CandidateAddress" class="form-label">Address</label>
+                            <textarea asp-for="CandidateAddress" class="form-control" rows="2"></textarea>
+                            <span asp-validation-for="CandidateAddress" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-briefcase"></i> Position Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="DepartmentId" class="form-label">Department</label>
+                            <select asp-for="DepartmentId" class="form-select" asp-items="ViewBag.Departments">
+                                <option value="">-- Select Department --</option>
+                            </select>
+                            <span asp-validation-for="DepartmentId" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="DesignationId" class="form-label">Designation</label>
+                            <select asp-for="DesignationId" class="form-select" asp-items="ViewBag.Designations">
+                                <option value="">-- Select Designation --</option>
+                            </select>
+                            <span asp-validation-for="DesignationId" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Location" class="form-label">Location</label>
+                            <input asp-for="Location" class="form-control" />
+                            <span asp-validation-for="Location" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="JoiningDate" class="form-label">Joining Date</label>
+                            <input asp-for="JoiningDate" type="date" class="form-control" />
+                            <span asp-validation-for="JoiningDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-currency-rupee"></i> Salary Components</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="BasicSalary" class="form-label">Basic Salary (Annual)</label>
+                            <input asp-for="BasicSalary" type="number" step="0.01" class="form-control salary-input" />
+                            <span asp-validation-for="BasicSalary" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="HRA" class="form-label">HRA</label>
+                            <input asp-for="HRA" type="number" step="0.01" class="form-control salary-input" />
+                            <span asp-validation-for="HRA" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ConveyanceAllowance" class="form-label">Conveyance Allowance</label>
+                            <input asp-for="ConveyanceAllowance" type="number" step="0.01" class="form-control salary-input" />
+                            <span asp-validation-for="ConveyanceAllowance" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="MedicalAllowance" class="form-label">Medical Allowance</label>
+                            <input asp-for="MedicalAllowance" type="number" step="0.01" class="form-control salary-input" />
+                            <span asp-validation-for="MedicalAllowance" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="SpecialAllowance" class="form-label">Special Allowance</label>
+                            <input asp-for="SpecialAllowance" type="number" step="0.01" class="form-control salary-input" />
+                            <span asp-validation-for="SpecialAllowance" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="OtherAllowances" class="form-label">Other Allowances</label>
+                            <input asp-for="OtherAllowances" type="number" step="0.01" class="form-control salary-input" />
+                            <span asp-validation-for="OtherAllowances" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <strong>Total CTC: ₹<span id="totalCTC">0.00</span></strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-file-text"></i> Additional Terms</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="AdditionalTerms" class="form-label">Additional Terms & Conditions (Optional)</label>
+                        <textarea asp-for="AdditionalTerms" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="AdditionalTerms" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-check-circle"></i> Create Offer Letter
+                </button>
+                <a asp-action="Index" class="btn btn-secondary btn-lg">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+        <script>
+            $(document).ready(function() {
+                function calculateCTC() {
+                    var basic = parseFloat($('#BasicSalary').val()) || 0;
+                    var hra = parseFloat($('#HRA').val()) || 0;
+                    var conveyance = parseFloat($('#ConveyanceAllowance').val()) || 0;
+                    var medical = parseFloat($('#MedicalAllowance').val()) || 0;
+                    var special = parseFloat($('#SpecialAllowance').val()) || 0;
+                    var other = parseFloat($('#OtherAllowances').val()) || 0;
+
+                    var ctc = basic + hra + conveyance + medical + special + other;
+
+                    $('#totalCTC').text(ctc.toFixed(2));
+                }
+
+                $('.salary-input').on('input', calculateCTC);
+                calculateCTC();
+            });
+        </script>
+}
