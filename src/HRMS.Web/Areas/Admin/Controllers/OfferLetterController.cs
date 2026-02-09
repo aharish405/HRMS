@@ -98,20 +98,14 @@ public class OfferLetterController : Controller
 
         var pdfResult = await _offerLetterService.GenerateOfferLetterPdfAsync(id);
 
-        if (!pdfResult.Success)
-        {
-            TempData["ErrorMessage"] = pdfResult.Message;
-            return RedirectToAction(nameof(Index));
-        }
+        // DEBUGGING: Return a simple text file to test download capability
+        var content = "This is a test file to verify download functionality.";
+        var bytes = System.Text.Encoding.UTF8.GetBytes(content);
+        var stream = new MemoryStream(bytes);
+        var testFileName = "test_download.txt";
 
-        var offerLetter = offerLetterResult.Data!;
-        var fileName = $"OfferLetter_{offerLetter.CandidateName.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd}.pdf";
-
-        _logger.LogInformation("Generated PDF size: {Size} bytes for Offer Letter {ID}", pdfResult.Data!.Length, id);
-
-        var stream = new MemoryStream(pdfResult.Data!);
-        Response.Headers.Append("Content-Disposition", $"attachment; filename={fileName}");
-        return File(stream, "application/pdf", fileName);
+        Response.Headers.Append("Content-Disposition", $"attachment; filename={testFileName}");
+        return File(stream, "text/plain", testFileName);
     }
 
     [HttpPost]
