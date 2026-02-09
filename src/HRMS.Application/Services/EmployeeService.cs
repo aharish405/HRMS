@@ -72,6 +72,31 @@ public class EmployeeService : IEmployeeService
         }
     }
 
+    public async Task<Result<EmployeeDto>> GetEmployeeByEmailAsync(string email)
+    {
+        try
+        {
+            var employeeRepo = _unitOfWork.Repository<Employee>();
+            var employees = await employeeRepo.FindAsync(e => e.Email == email);
+            var employee = employees.FirstOrDefault();
+
+            if (employee == null)
+            {
+                return Result<EmployeeDto>.FailureResult("Employee not found");
+            }
+
+            await LoadNavigationPropertiesAsync(employee);
+
+            var employeeDto = _mapper.Map<EmployeeDto>(employee);
+            return Result<EmployeeDto>.SuccessResult(employeeDto);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting employee by email {Email}", email);
+            return Result<EmployeeDto>.FailureResult("Error retrieving employee");
+        }
+    }
+
     public async Task<Result<EmployeeDto>> CreateEmployeeAsync(CreateEmployeeDto dto, string createdBy)
     {
         try
@@ -109,12 +134,12 @@ public class EmployeeService : IEmployeeService
         }
     }
 
-    public async Task<Result<EmployeeDto>> UpdateEmployeeAsync(UpdateEmployeeDto dto, string modifiedBy)
+    public async Task<Result<EmployeeDto>> UpdateEmployeeAsync(int id, UpdateEmployeeDto dto, string modifiedBy)
     {
         try
         {
             var employeeRepo = _unitOfWork.Repository<Employee>();
-            var employee = await employeeRepo.GetByIdAsync(dto.Id);
+            var employee = await employeeRepo.GetByIdAsync(id);
 
             if (employee == null)
             {
@@ -122,7 +147,7 @@ public class EmployeeService : IEmployeeService
             }
 
             // Validate unique constraints (excluding current employee)
-            if (!await IsEmailUniqueAsync(dto.Email, dto.Id))
+            if (!await IsEmailUniqueAsync(dto.Email, id))
             {
                 return Result<EmployeeDto>.FailureResult("Email already exists");
             }
@@ -143,7 +168,7 @@ public class EmployeeService : IEmployeeService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating employee {EmployeeId}", dto.Id);
+            _logger.LogError(ex, "Error updating employee {EmployeeId}", id);
             return Result<EmployeeDto>.FailureResult("Error updating employee");
         }
     }
