@@ -96,6 +96,8 @@ public class OfferLetterController : Controller
             return RedirectToAction(nameof(Index));
         }
 
+        var pdfResult = await _offerLetterService.GenerateOfferLetterPdfAsync(id);
+
         if (!pdfResult.Success)
         {
             TempData["ErrorMessage"] = pdfResult.Message;
