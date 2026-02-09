@@ -125,7 +125,7 @@ public class EmployeeController : Controller
             return View(model);
         }
 
-        var result = await _employeeService.UpdateEmployeeAsync(model, User.Identity!.Name!);
+        var result = await _employeeService.UpdateEmployeeAsync(id, model, User.Identity!.Name!);
 
         if (!result.Success)
         {
