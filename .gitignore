@@ -1,0 +1,28 @@
+## Build artifacts
+bin/
+obj/
+*.user
+*.suo
+
+## Visual Studio
+.vs/
+*.userprefs
+
+## Logs
+Logs/
+*.log
+
+## Database
+*.db
+*.db-shm
+*.db-wal
+
+## User secrets
+appsettings.Development.json
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Node modules (if any)
+node_modules/
