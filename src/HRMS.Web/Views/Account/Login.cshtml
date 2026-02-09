@@ -1,124 +1,315 @@
 @model LoginViewModel
 @{
-    ViewData["Title"] = "Login";
+    Layout = "_LoginLayout";
+    ViewData["Title"] = "Sign In";
 }
 
-<!DOCTYPE html>
-<html lang="en">
+<style>
+    h1 {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #1b1b1b;
+    }
 
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - WorkAxis HRMS</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+    .form-control {
+        border: none;
+        border-bottom: 1px solid #666;
+        border-radius: 0;
+        padding: 6px 0;
+        box-shadow: none;
+        background-color: transparent;
+    }
+
+    .form-control:focus {
+        box-shadow: none;
+        border-color: #0067b8;
+    }
+
+    .btn-primary {
+        background-color: #0067b8;
+        border-color: #0067b8;
+        border-radius: 0;
+        padding: 6px 32px;
+        font-weight: 600;
+        float: right;
+        min-width: 108px;
+    }
+
+    .btn-primary:hover {
+        background-color: #005da6;
+        border-color: #005da6;
+    }
+
+    .btn-secondary {
+        background-color: #cccccc;
+        border-color: #cccccc;
+        color: #000;
+        border-radius: 0;
+        padding: 6px 32px;
+        font-weight: 600;
+        border: none;
+        float: right;
+        margin-left: 5px;
+    }
+
+    .btn-secondary:hover {
+        background-color: #b3b3b3;
+        border-color: #b3b3b3;
+    }
+
+    .back-arrow {
+        cursor: pointer;
+        font-size: 1.2rem;
+        margin-right: 8px;
+        color: #1b1b1b;
+        text-decoration: none;
+    }
+
+    .back-arrow:hover {
+        background-color: #e6e6e6;
+        border-radius: 50%;
+    }
+
+    .identity-banner {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        font-size: 15px;
+    }
+
+    .step-section {
+        transition: all 0.3s ease;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    /* Loader Styling */
+    .progress-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background-color: #fca;
+        overflow: hidden;
+        display: none;
+    }
+
+    .progress-bar-animated {
+        width: 100%;
+        height: 100%;
+        background-color: #0067b8;
+        animation: progress-animation 1.5s infinite linear;
+        transform-origin: 0% 50%;
+    }
+
+    @@keyframes progress-animation {
+        0% {
+            transform: translateX(0) scaleX(0);
         }
 
-        .login-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-            max-width: 450px;
-            width: 100%;
+        40% {
+            transform: translateX(0) scaleX(0.4);
         }
 
-        .login-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem;
-            text-align: center;
+        100% {
+            transform: translateX(100%) scaleX(0.5);
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.4s ease-in;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateX(10px);
         }
 
-        .login-body {
-            padding: 2rem;
+        to {
+            opacity: 1;
+            transform: translateX(0);
         }
+    }
 
-        .btn-login {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            color: white;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: 600;
-        }
+    .links {
+        margin-top: 15px;
+        font-size: 13px;
+    }
 
-        .btn-login:hover {
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-            color: white;
-        }
-    </style>
-</head>
+    .links a {
+        text-decoration: none;
+        color: #0067b8;
+    }
 
-<body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="login-card">
-                    <div class="login-header">
-                        <h2><i class="bi bi-people-fill"></i> WorkAxis</h2>
-                        <p class="mb-0">Everything revolves around people</p>
-                    </div>
-                    <div class="login-body">
-                        <h4 class="text-center mb-4">Sign In</h4>
+    .links a:hover {
+        text-decoration: underline;
+    }
+</style>
 
-                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+<div class="progress-container" id="mainLoader">
+    <div class="progress-bar-animated"></div>
+</div>
 
-                        <form asp-action="Login" method="post">
-                            <div class="mb-3">
-                                <label asp-for="Email" class="form-label">
-                                    <i class="bi bi-envelope"></i> Email Address
-                                </label>
-                                <input asp-for="Email" class="form-control form-control-lg"
-                                    placeholder="Enter your email" />
-                                <span asp-validation-for="Email" class="text-danger"></span>
-                            </div>
+<div asp-validation-summary="All" class="text-danger mb-3 small" style="list-style: none; padding: 0;"></div>
 
-                            <div class="mb-3">
-                                <label asp-for="Password" class="form-label">
-                                    <i class="bi bi-lock"></i> Password
-                                </label>
-                                <input asp-for="Password" class="form-control form-control-lg"
-                                    placeholder="Enter your password" />
-                                <span asp-validation-for="Password" class="text-danger"></span>
-                            </div>
+<form asp-action="Login" method="post" id="loginForm">
+    <!-- STEP 1: Username -->
+    <div id="step1" class="step-section fade-in">
+        <h1>Sign in</h1>
+        <p class="mb-4">to continue to WorkAxis</p>
 
-                            <div class="mb-3 form-check">
-                                <input asp-for="RememberMe" class="form-check-input" />
-                                <label asp-for="RememberMe" class="form-check-label">
-                                    Remember me
-                                </label>
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-login btn-lg">
-                                    <i class="bi bi-box-arrow-in-right"></i> Sign In
-                                </button>
-                            </div>
-                        </form>
-
-                        <div class="mt-4 text-center">
-                            <small class="text-muted">
-                                Default credentials: admin@workaxis.com / Admin@12345
-                            </small>
-                        </div>
-                    </div>
-                </div>
+        <div class="mb-3">
+            <input asp-for="Email" class="form-control" placeholder="Email, phone, or Skype" id="emailInput"
+                autocomplete="off" />
+            <span asp-validation-for="Email" class="text-danger small"></span>
+            <div id="emailError" class="text-danger small mt-1" style="display:none">Please enter a valid email address.
             </div>
+        </div>
+
+        <div class="links mb-4">
+            <a href="#">No account? Create one!</a><br />
+            <a href="#" class="mt-1 d-inline-block">Can't access your account?</a>
+        </div>
+
+        <div class="clearfix mt-5">
+            <button type="button" class="btn btn-primary" id="btnNext">Next</button>
         </div>
     </div>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-</body>
+    <!-- STEP 2: Password -->
+    <div id="step2" class="step-section hidden fade-in">
+        <div class="identity-banner">
+            <i class="bi bi-arrow-left date back-arrow p-1" id="btnBack"></i>
+            <span id="displayEmail" class="fw-bold"></span>
+        </div>
 
-</html>
+        <h1>Enter password</h1>
+
+        <div class="mb-3 mt-4">
+            <input asp-for="Password" type="password" class="form-control" placeholder="Password" id="passwordInput" />
+            <span asp-validation-for="Password" class="text-danger small"></span>
+            <div id="passwordError" class="text-danger small mt-1" style="display:none">Please enter your password.
+            </div>
+        </div>
+
+        <div class="mb-3 form-check mt-3">
+            <input asp-for="RememberMe" class="form-check-input" />
+            <label asp-for="RememberMe" class="form-check-label small">Keep me signed in</label>
+        </div>
+
+        <div class="links mb-4">
+            <a href="#">Forgot password?</a>
+        </div>
+
+        <div class="clearfix mt-4">
+            <button type="submit" class="btn btn-primary" id="btnSignIn">Sign in</button>
+        </div>
+    </div>
+</form>
+
+<div class="mt-4 pt-3 text-center border-top">
+    <small class="text-muted" style="font-size: 11px;">
+        Use: admin@workaxis.com / Admin@12345
+    </small>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Check if we have an error (e.g. invalid login attempt returning to this page)
+            var hasValidationErrors = $('.validation-summary-errors').length > 0 || $('.text-danger:not(:empty)').length > 0;
+
+            // If email is pre-filled and we have errors, likely a failed login, show step 2
+            // But checking simplistic conditions first
+            var emailVal = $('#emailInput').val();
+            if (emailVal && hasValidationErrors) {
+                // If there's a model error (like password mismatch), go to split view
+                // For simplicity, let's keep user on Step 1 if generic error, 
+                // but if email is there, user might want to try password again.
+                // Let's just persist state if possible, but simplest is start Step 1 unless we add complex server logic.
+                // Actually, if 'Email' field has content, let's allow quick next.
+                // For now, default to Step 1 to be safe and clean.
+            }
+
+            // Next Button Click
+            $('#btnNext').click(function () {
+                var email = $('#emailInput').val();
+                if (!email) {
+                    $('#emailInput').addClass('is-invalid');
+                    $('#emailError').show();
+                    return;
+                }
+
+                // Simple regex for email (optional)
+                // var emailRegex = /^[^\s@]+@@[^\s@]+\.[^\s@]+$/;
+                // if (!emailRegex.test(email)) { ... }
+
+                showLoader(true);
+                $('#emailInput').removeClass('is-invalid');
+                $('#emailError').hide();
+
+                // Simulate processing delay
+                setTimeout(function () {
+                    showLoader(false);
+                    $('#displayEmail').text(email);
+                    $('#step1').addClass('hidden');
+                    $('#step2').removeClass('hidden');
+                    $('#passwordInput').focus();
+                }, 800);
+            });
+
+            // Back Button Click
+            $('#btnBack').click(function () {
+                $('#step2').addClass('hidden');
+                $('#step1').removeClass('hidden');
+                $('#passwordInput').val(''); // clear password
+            });
+
+            // Sign In Button Click
+            $('#btnSignIn').click(function (e) {
+                var password = $('#passwordInput').val();
+                if (!password) {
+                    e.preventDefault();
+                    $('#passwordInput').addClass('is-invalid');
+                    $('#passwordError').show();
+                    return;
+                }
+
+                showLoader(true);
+                // Form submits naturally
+            });
+
+            // Input handlers to remove error states
+            $('#emailInput').on('input', function () {
+                $(this).removeClass('is-invalid');
+                $('#emailError').hide();
+            });
+
+            $('#passwordInput').on('input', function () {
+                $(this).removeClass('is-invalid');
+                $('#passwordError').hide();
+            });
+
+            // Enter key handling
+            $('#emailInput').keypress(function (e) {
+                if (e.which == 13) {
+                    e.preventDefault();
+                    $('#btnNext').click();
+                }
+            });
+
+            function showLoader(show) {
+                if (show) {
+                    $('#mainLoader').show();
+                } else {
+                    $('#mainLoader').hide();
+                }
+            }
+        });
+    </script>
+}
