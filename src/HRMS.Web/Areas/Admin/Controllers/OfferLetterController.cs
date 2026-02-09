@@ -107,7 +107,10 @@ public class OfferLetterController : Controller
         var offerLetter = offerLetterResult.Data!;
         var fileName = $"OfferLetter_{offerLetter.CandidateName.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd}.pdf";
 
-        return File(pdfResult.Data!, "application/pdf", fileName);
+        _logger.LogInformation("Generated PDF size: {Size} bytes for Offer Letter {ID}", pdfResult.Data!.Length, id);
+
+        var stream = new MemoryStream(pdfResult.Data!);
+        return File(stream, "application/pdf", fileName);
     }
 
     [HttpPost]
