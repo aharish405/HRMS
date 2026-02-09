@@ -8,10 +8,12 @@
         <h2><i class="bi bi-file-earmark-text"></i> Offer Letter Details</h2>
     </div>
     <div class="col-md-4 text-end">
-        <a asp-action="DownloadPdf" asp-route-id="@Model.Id" class="btn btn-success"
-            download="@("OfferLetter_" + Model.CandidateName.Replace(" ", "_") + ".pdf")">
-            <i class="bi bi-download"></i> Download PDF
-        </a>
+        <form asp-action="DownloadPdf" method="get" class="d-inline">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-download"></i> Download PDF
+            </button>
+        </form>
         <a asp-action="Index" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Back
         </a>
@@ -161,10 +163,12 @@
                     </select>
                     <button type="submit" class="btn btn-primary w-100">Update Status</button>
                 </form>
-                <a asp-action="DownloadPdf" asp-route-id="@Model.Id" class="btn btn-success w-100"
-                    download="@("OfferLetter_" + Model.CandidateName.Replace(" ", "_") + ".pdf")">
-                    <i class="bi bi-file-pdf"></i> Download PDF
-                </a>
+                <form asp-action="DownloadPdf" method="get" class="w-100">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-file-pdf"></i> Download PDF
+                    </button>
+                </form>
             </div>
         </div>
 

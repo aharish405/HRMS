@@ -111,7 +111,7 @@ public class OfferLetterController : Controller
 
         var stream = new MemoryStream(pdfResult.Data!);
         Response.Headers.Append("Content-Disposition", $"attachment; filename={fileName}");
-        return File(stream, "application/octet-stream", fileName);
+        return File(stream, "application/pdf", fileName);
     }
 
     [HttpPost]
