@@ -1,0 +1,177 @@
+@model HRMS.Application.DTOs.Payroll.PayrollDto
+@{
+    ViewData["Title"] = "Payroll Details";
+}
+
+<div class="row mb-3">
+    <div class="col-md-8">
+        <h2><i class="bi bi-calculator"></i> Payroll Details</h2>
+    </div>
+    <div class="col-md-4 text-end">
+        <a asp-action="DownloadPayslip" asp-route-id="@Model.Id" class="btn btn-success">
+            <i class="bi bi-download"></i> Download Payslip
+        </a>
+        <a asp-action="Index" asp-route-month="@Model.Month" asp-route-year="@Model.Year" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-person"></i> Employee Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Employee Code:</strong></div>
+                    <div class="col-md-8">@Model.EmployeeCode</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Employee Name:</strong></div>
+                    <div class="col-md-8">@Model.EmployeeName</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Department:</strong></div>
+                    <div class="col-md-8">@Model.DepartmentName</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Designation:</strong></div>
+                    <div class="col-md-8">@Model.DesignationTitle</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Pay Period:</strong></div>
+                    <div class="col-md-8">@Model.MonthYear</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Attendance Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <h6 class="text-muted">Working Days</h6>
+                        <h3>@Model.WorkingDays</h3>
+                    </div>
+                    <div class="col-md-3">
+                        <h6 class="text-muted">Present Days</h6>
+                        <h3 class="text-success">@Model.PresentDays</h3>
+                    </div>
+                    <div class="col-md-3">
+                        <h6 class="text-muted">Leave Days</h6>
+                        <h3 class="text-warning">@Model.LeaveDays</h3>
+                    </div>
+                    <div class="col-md-3">
+                        <h6 class="text-muted">Absent Days</h6>
+                        <h3 class="text-danger">@Model.AbsentDays</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Earnings</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <td>Basic Salary</td>
+                        <td class="text-end"><strong>₹@Model.BasicSalary.ToString("N2")</strong></td>
+                    </tr>
+                    <tr>
+                        <td>HRA</td>
+                        <td class="text-end">₹@Model.HRA.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>Conveyance Allowance</td>
+                        <td class="text-end">₹@Model.ConveyanceAllowance.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>Medical Allowance</td>
+                        <td class="text-end">₹@Model.MedicalAllowance.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>Special Allowance</td>
+                        <td class="text-end">₹@Model.SpecialAllowance.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>Other Allowances</td>
+                        <td class="text-end">₹@Model.OtherAllowances.ToString("N2")</td>
+                    </tr>
+                    <tr class="table-success">
+                        <td><strong>Gross Salary</strong></td>
+                        <td class="text-end"><strong>₹@Model.GrossSalary.ToString("N2")</strong></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-dash-circle"></i> Deductions</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <td>PF (Provident Fund)</td>
+                        <td class="text-end">₹@Model.PF.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>ESI</td>
+                        <td class="text-end">₹@Model.ESI.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>Professional Tax</td>
+                        <td class="text-end">₹@Model.ProfessionalTax.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>TDS</td>
+                        <td class="text-end">₹@Model.TDS.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td>Other Deductions</td>
+                        <td class="text-end">₹@Model.OtherDeductions.ToString("N2")</td>
+                    </tr>
+                    <tr class="table-danger">
+                        <td><strong>Total Deductions</strong></td>
+                        <td class="text-end"><strong>₹@Model.TotalDeductions.ToString("N2")</strong></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-3 bg-light">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Net Salary (Take Home)</h6>
+                <h2 class="text-success">₹@Model.NetSalary.ToString("N2")</h2>
+                <hr />
+                <a asp-action="DownloadPayslip" asp-route-id="@Model.Id" class="btn btn-success btn-lg w-100">
+                    <i class="bi bi-file-pdf"></i> Download PDF Payslip
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Processing Info</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Processed On:</small><br />
+                    <strong>@Model.ProcessedOn?.ToString("dd MMM yyyy HH:mm")</strong>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Processed By:</small><br />
+                    <strong>@Model.ProcessedBy</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

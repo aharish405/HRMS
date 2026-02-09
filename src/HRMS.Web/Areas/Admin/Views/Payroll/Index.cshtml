@@ -1,0 +1,126 @@
+@model HRMS.Application.DTOs.Payroll.GeneratePayrollDto
+@{
+    ViewData["Title"] = "Payroll Management";
+    var payrolls = ViewBag.Payrolls as IEnumerable<HRMS.Application.DTOs.Payroll.PayrollDto> ??
+    Enumerable.Empty<HRMS.Application.DTOs.Payroll.PayrollDto>();
+    var selectedMonth = ViewBag.SelectedMonth;
+    var selectedYear = ViewBag.SelectedYear;
+}
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <h2><i class="bi bi-calculator"></i> Payroll Management</h2>
+    </div>
+    <div class="col-md-6 text-end">
+        <a asp-action="Generate" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Generate Payroll
+        </a>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="month" class="form-label">Month</label>
+                <select name="month" id="month" class="form-select">
+                    @for (int i = 1; i <= 12; i++)
+                    {
+                        <option value="@i" selected="@(i == selectedMonth)">@(new DateTime(2000, i, 1).ToString("MMMM"))
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="year" class="form-label">Year</label>
+                <select name="year" id="year" class="form-select">
+                    @for (int i = DateTime.Now.Year; i >= 2020; i--)
+                    {
+                        <option value="@i" selected="@(i == selectedYear)">@i</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary d-block w-100">
+                    <i class="bi bi-search"></i> Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (payrolls.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Department</th>
+                            <th>Designation</th>
+                            <th>Working Days</th>
+                            <th>Present Days</th>
+                            <th>Gross Salary</th>
+                            <th>Deductions</th>
+                            <th>Net Salary</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var payroll in payrolls)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@payroll.EmployeeCode</strong><br />
+                                    <small>@payroll.EmployeeName</small>
+                                </td>
+                                <td>@payroll.DepartmentName</td>
+                                <td>@payroll.DesignationTitle</td>
+                                <td>@payroll.WorkingDays</td>
+                                <td>@payroll.PresentDays</td>
+                                <td>₹@payroll.GrossSalary.ToString("N2")</td>
+                                <td>₹@payroll.TotalDeductions.ToString("N2")</td>
+                                <td><strong>₹@payroll.NetSalary.ToString("N2")</strong></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Details" asp-route-id="@payroll.Id" class="btn btn-outline-info"
+                                            title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-action="DownloadPayslip" asp-route-id="@payroll.Id"
+                                            class="btn btn-outline-success" title="Download Payslip">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-light">
+                            <td colspan="5"><strong>Total</strong></td>
+                            <td><strong>₹@payrolls.Sum(p => p.GrossSalary).ToString("N2")</strong></td>
+                            <td><strong>₹@payrolls.Sum(p => p.TotalDeductions).ToString("N2")</strong></td>
+                            <td><strong>₹@payrolls.Sum(p => p.NetSalary).ToString("N2")</strong></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                <p class="mt-2">No payroll records found for @(new DateTime(2000, selectedMonth, 1).ToString("MMMM"))
+                    @selectedYear</p>
+                <a asp-action="Generate" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Generate Payroll
+                </a>
+            </div>
+        }
+    </div>
+</div>

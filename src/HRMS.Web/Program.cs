@@ -69,6 +69,7 @@ builder.Services.AddAutoMapper(typeof(HRMS.Application.Mappings.EmployeeProfile)
 builder.Services.AddScoped<HRMS.Application.Interfaces.IEmployeeService, HRMS.Application.Services.EmployeeService>();
 builder.Services.AddScoped<HRMS.Application.Interfaces.IMasterDataService, HRMS.Application.Services.MasterDataService>();
 builder.Services.AddScoped<HRMS.Application.Interfaces.ISalaryService, HRMS.Application.Services.SalaryService>();
+builder.Services.AddScoped<HRMS.Application.Interfaces.IPayrollService, HRMS.Application.Services.PayrollService>();
 
 // Configure Authorization Policies
 builder.Services.AddAuthorization(options =>

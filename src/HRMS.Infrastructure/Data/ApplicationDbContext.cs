@@ -17,6 +17,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<Department> Departments => Set<Department>();
     public DbSet<Designation> Designations => Set<Designation>();
     public DbSet<Salary> Salaries => Set<Salary>();
+    public DbSet<Payroll> Payrolls => Set<Payroll>();
     public DbSet<PayrollRun> PayrollRuns => Set<PayrollRun>();
     public DbSet<Payslip> Payslips => Set<Payslip>();
     public DbSet<LeaveType> LeaveTypes => Set<LeaveType>();
@@ -37,6 +38,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<Department>().HasQueryFilter(d => !d.IsDeleted);
         modelBuilder.Entity<Designation>().HasQueryFilter(d => !d.IsDeleted);
         modelBuilder.Entity<Salary>().HasQueryFilter(s => !s.IsDeleted);
+        modelBuilder.Entity<Payroll>().HasQueryFilter(p => !p.IsDeleted);
         modelBuilder.Entity<PayrollRun>().HasQueryFilter(p => !p.IsDeleted);
         modelBuilder.Entity<Payslip>().HasQueryFilter(p => !p.IsDeleted);
         modelBuilder.Entity<LeaveType>().HasQueryFilter(l => !l.IsDeleted);
