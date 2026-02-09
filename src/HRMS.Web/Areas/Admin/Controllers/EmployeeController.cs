@@ -117,7 +117,7 @@ public class EmployeeController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(UpdateEmployeeDto model)
+    public async Task<IActionResult> Edit(int id, UpdateEmployeeDto model)
     {
         if (!ModelState.IsValid)
         {
