@@ -1,10 +1,11 @@
-using HRMS.Domain.Common;
 using HRMS.Domain.Enums;
 
-namespace HRMS.Domain.Entities;
+namespace HRMS.Application.DTOs.OfferLetter;
 
-public class OfferLetter : AuditableEntity
+public class OfferLetterDto
 {
+    public int Id { get; set; }
+
     // Candidate Information
     public string CandidateName { get; set; } = string.Empty;
     public string CandidateEmail { get; set; } = string.Empty;
@@ -13,7 +14,9 @@ public class OfferLetter : AuditableEntity
 
     // Position Details
     public int DepartmentId { get; set; }
+    public string DepartmentName { get; set; } = string.Empty;
     public int DesignationId { get; set; }
+    public string DesignationTitle { get; set; } = string.Empty;
 
     // Salary Details
     public decimal BasicSalary { get; set; }
@@ -31,12 +34,11 @@ public class OfferLetter : AuditableEntity
 
     // Status
     public OfferLetterStatus Status { get; set; }
+    public string StatusDisplay => Status.ToString();
 
     // Metadata
     public DateTime GeneratedOn { get; set; }
     public string GeneratedBy { get; set; } = string.Empty;
-
-    // Navigation Properties
-    public Department Department { get; set; } = null!;
-    public Designation Designation { get; set; } = null!;
+    public DateTime CreatedOn { get; set; }
+    public string CreatedBy { get; set; } = string.Empty;
 }

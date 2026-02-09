@@ -71,6 +71,7 @@ builder.Services.AddScoped<HRMS.Application.Interfaces.IMasterDataService, HRMS.
 builder.Services.AddScoped<HRMS.Application.Interfaces.ISalaryService, HRMS.Application.Services.SalaryService>();
 builder.Services.AddScoped<HRMS.Application.Interfaces.IPayrollService, HRMS.Application.Services.PayrollService>();
 builder.Services.AddScoped<HRMS.Application.Interfaces.ILeaveService, HRMS.Application.Services.LeaveService>();
+builder.Services.AddScoped<HRMS.Application.Interfaces.IOfferLetterService, HRMS.Application.Services.OfferLetterService>();
 
 // Configure Authorization Policies
 builder.Services.AddAuthorization(options =>

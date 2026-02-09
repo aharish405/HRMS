@@ -12,32 +12,52 @@ public class OfferLetterConfiguration : IEntityTypeConfiguration<OfferLetter>
 
         builder.HasKey(o => o.Id);
 
-        builder.Property(o => o.EmployeeName)
-            .IsRequired()
-            .HasMaxLength(200);
-
-        builder.Property(o => o.Designation)
+        // Candidate Information
+        builder.Property(o => o.CandidateName)
             .IsRequired()
             .HasMaxLength(100);
 
-        builder.Property(o => o.Department)
+        builder.Property(o => o.CandidateEmail)
             .IsRequired()
-            .HasMaxLength(100);
+            .HasMaxLength(256);
+
+        builder.Property(o => o.CandidatePhone)
+            .IsRequired()
+            .HasMaxLength(20);
+
+        builder.Property(o => o.CandidateAddress)
+            .IsRequired()
+            .HasMaxLength(500);
+
+        // Salary Details
+        builder.Property(o => o.BasicSalary)
+            .HasPrecision(18, 2);
+
+        builder.Property(o => o.HRA)
+            .HasPrecision(18, 2);
+
+        builder.Property(o => o.ConveyanceAllowance)
+            .HasPrecision(18, 2);
+
+        builder.Property(o => o.MedicalAllowance)
+            .HasPrecision(18, 2);
+
+        builder.Property(o => o.SpecialAllowance)
+            .HasPrecision(18, 2);
+
+        builder.Property(o => o.OtherAllowances)
+            .HasPrecision(18, 2);
 
         builder.Property(o => o.CTC)
             .HasPrecision(18, 2);
 
+        // Offer Details
         builder.Property(o => o.Location)
+            .IsRequired()
             .HasMaxLength(100);
 
-        builder.Property(o => o.TemplateContent)
-            .IsRequired();
-
-        builder.Property(o => o.GeneratedContent)
-            .IsRequired();
-
-        builder.Property(o => o.FilePath)
-            .HasMaxLength(500);
+        builder.Property(o => o.AdditionalTerms)
+            .HasMaxLength(1000);
 
         builder.Property(o => o.GeneratedBy)
             .IsRequired()
@@ -54,13 +74,19 @@ public class OfferLetterConfiguration : IEntityTypeConfiguration<OfferLetter>
             .IsRowVersion();
 
         // Relationships
-        builder.HasOne(o => o.Employee)
-            .WithMany(e => e.OfferLetters)
-            .HasForeignKey(o => o.EmployeeId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(o => o.Department)
+            .WithMany()
+            .HasForeignKey(o => o.DepartmentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(o => o.Designation)
+            .WithMany()
+            .HasForeignKey(o => o.DesignationId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Indexes
-        builder.HasIndex(o => o.EmployeeId);
+        builder.HasIndex(o => o.CandidateEmail);
         builder.HasIndex(o => o.GeneratedOn);
+        builder.HasIndex(o => o.Status);
     }
 }
