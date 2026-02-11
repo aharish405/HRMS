@@ -1,22 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
-  <ItemGroup>
-    <ProjectReference Include="..\HRMS.Application\HRMS.Application.csproj" />
-    <ProjectReference Include="..\HRMS.Infrastructure\HRMS.Infrastructure.csproj" />
-    <ProjectReference Include="..\HRMS.Shared\HRMS.Shared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
-
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
-
-</Project>
+ 
+   <ItemGroup>
+     <ProjectReference Include="..\HRMS.Application\HRMS.Application.csproj" />
+     <ProjectReference Include="..\HRMS.Infrastructure\HRMS.Infrastructure.csproj" />
+     <ProjectReference Include="..\HRMS.Shared\HRMS.Shared.csproj" />
+   </ItemGroup>
+ 
+   <ItemGroup>
+     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
+       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+       <PrivateAssets>all</PrivateAssets>
+     </PackageReference>
+     <PackageReference Include="itext" Version="8.0.5" />
+     <PackageReference Include="itext.pdfhtml" Version="5.0.5" />
+     <PackageReference Include="itext.bouncy-castle-adapter" Version="8.0.5" />
+     <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
+   </ItemGroup>
+ 
+   <PropertyGroup>
+     <TargetFramework>net8.0</TargetFramework>
+     <Nullable>enable</Nullable>
+     <ImplicitUsings>enable</ImplicitUsings>
+   </PropertyGroup>
+ 
+ </Project>

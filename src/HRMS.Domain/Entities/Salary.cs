@@ -32,6 +32,11 @@ public class Salary : AuditableEntity
     public DateTime? EffectiveTo { get; set; }
     public bool IsActive { get; set; } = true;
 
+    // Source Tracking - Link to Offer Letter
+    public int? OfferLetterId { get; set; }
+    public bool IsSystemGenerated { get; set; } = false;
+
     // Navigation Properties
     public Employee Employee { get; set; } = null!;
+    public OfferLetter? OfferLetter { get; set; }
 }

@@ -1,17 +1,246 @@
 ﻿@{
-    ViewData["Title"] = "Home";
+    Layout = "_PublicLayout";
+    ViewData["Title"] = "Enterprise HR Management Simplified";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome to WorkAxis</h1>
-    <p class="lead">Everything revolves around people</p>
-
-    @if (User.Identity?.IsAuthenticated != true)
-    {
-            <div class="mt-5">
-                <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg">
-                    <i class="bi bi-box-arrow-in-right"></i> Login to Continue
-                </a>
-            </div>
+<style>
+    .hero-section {
+        position: relative;
+        padding: 100px 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%),
+            url('/images/hero.png') no-repeat center center;
+        background-size: cover;
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
     }
-</div>
+
+    .feature-card {
+        border: none;
+        border-radius: 1.5rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        background: var(--bs-primary);
+        color: white;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+        position: relative;
+        padding-bottom: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 4px;
+        background: var(--bs-primary);
+        border-radius: 2px;
+    }
+
+    .bg-light-blue {
+        background-color: #f8fbff;
+    }
+
+    .cta-banner {
+        background: linear-gradient(45deg, #0061f2 0%, #00cfd5 100%);
+        border-radius: 2rem;
+        padding: 5rem;
+        color: white;
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-3 fw-bold mb-4 text-dark">
+                    Modern HR. <br />
+                    <span class="text-primary">Simplified.</span>
+                </h1>
+                <p class="lead text-muted mb-5">
+                    Experience the future of workforce management. WorkAxis empowers your team with intelligent tools
+                    for payroll, recruitment, performance, and more.
+                </p>
+                <div class="d-flex gap-3">
+                    <a asp-controller="Account" asp-action="Login"
+                        class="btn btn-primary btn-lg rounded-pill px-5 shadow">
+                        Sign In Now
+                    </a>
+                    <a href="#features" class="btn btn-outline-dark btn-lg rounded-pill px-5">
+                        Discover Features
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-5 bg-white">
+    <div class="container py-5">
+        <div class="row align-items-center mb-5">
+            <div class="col-lg-6">
+                <h2 class="section-title fw-bold">Everything you need <br />to manage your workforce</h2>
+                <p class="text-muted">WorkAxis combines all your core HR processes into a single, intuitive platform. No
+                    more fragmented data or manual workflows.</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 feature-card shadow-sm p-4">
+                    <div class="feature-icon bg-primary shadow-sm text-white">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <h4 class="fw-bold">Workforce Management</h4>
+                    <p class="text-muted">Centralize employee data, manage organizational hierarchies, and track
+                        performance with ease.</p>
+                    <img src="/images/feature-workforce.png" class="img-fluid rounded mt-auto"
+                        alt="Workforce Management">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 feature-card shadow-sm p-4">
+                    <div class="feature-icon bg-success shadow-sm text-white">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <h4 class="fw-bold">Intelligent Payroll</h4>
+                    <p class="text-muted">Automated salary calculations, tax compliance, and instant payslip generation
+                        for your entire team.</p>
+                    <img src="/images/feature-payroll.png" class="img-fluid rounded mt-auto" alt="Payroll Management">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 feature-card shadow-sm p-4">
+                    <div class="feature-icon bg-warning shadow-sm text-white">
+                        <i class="bi bi-calendar2-check-fill"></i>
+                    </div>
+                    <h4 class="fw-bold">Leave & Attendance</h4>
+                    <p class="text-muted">Streamlined leave workflows with automated balances and real-time attendance
+                        tracking.</p>
+                    <div class="mt-auto bg-light p-4 rounded text-center">
+                        <i class="bi bi-calendar-event opacity-25" style="font-size: 5rem;"></i>
+                        <p class="small text-muted mt-2">Dynamic Leave Workflow Integrated</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Product Details Section -->
+<section id="about" class="py-5 bg-light-blue border-top border-bottom">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <h2 class="fw-bold mb-4">Why Businesses Trust WorkAxis</h2>
+                <div class="d-flex mb-4">
+                    <div class="flex-shrink-0 me-3">
+                        <i class="bi bi-shield-check text-primary fs-3"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold">Enterprise-Grade Security</h5>
+                        <p class="text-muted">Your data is protected with industry-leading encryption and robust access
+                            controls.</p>
+                    </div>
+                </div>
+                <div class="d-flex mb-4">
+                    <div class="flex-shrink-0 me-3">
+                        <i class="bi bi-lightning-charge text-primary fs-3"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold">High Performance</h5>
+                        <p class="text-muted">Lightning-fast response times and optimized workflows that save your team
+                            hours every week.</p>
+                    </div>
+                </div>
+                <div class="d-flex">
+                    <div class="flex-shrink-0 me-3">
+                        <i class="bi bi-graph-up text-primary fs-3"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold">Actionable Insights</h5>
+                        <p class="text-muted">Comprehensive reporting and analytics to help you make data-driven people
+                            decisions.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 px-lg-5">
+                <div class="p-5 bg-white shadow rounded-4 text-center">
+                    <h3 class="fw-bold mb-4">Ready to Transform Your HR?</h3>
+                    <p class="text-muted mb-4">Join hundreds of companies that use WorkAxis to power their people
+                        operations.</p>
+                    <a asp-controller="Account" asp-action="Login"
+                        class="btn btn-primary btn-lg rounded-pill w-100 shadow-sm">
+                        Start Your Free Trial
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="py-5 bg-white border-top">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="d-flex align-items-center mb-4">
+                    <img src="/images/logo-icon.png" height="40" class="me-2" alt="WorkAxis">
+                    <span class="fs-4 fw-bold">WorkAxis</span>
+                </div>
+                <p class="text-muted">Everything revolves around people. The complete HRMS solution for modern
+                    enterprises.</p>
+            </div>
+            <div class="col-md-2 mb-4 mb-md-0 offset-md-2">
+                <h6 class="fw-bold mb-4">Product</h6>
+                <ul class="list-unstyled text-muted small">
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Core HR</a></li>
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Payroll</a></li>
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Recruitment</a></li>
+                </ul>
+            </div>
+            <div class="col-md-2 mb-4 mb-md-0">
+                <h6 class="fw-bold mb-4">Company</h6>
+                <ul class="list-unstyled text-muted small">
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted">About Us</a></li>
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Contact</a></li>
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Careers</a></li>
+                </ul>
+            </div>
+            <div class="col-md-2">
+                <h6 class="fw-bold mb-4">Legal</h6>
+                <ul class="list-unstyled text-muted small">
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Privacy Policy</a></li>
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Terms of Service</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="row pt-5 mt-5 border-top">
+            <div class="col text-center text-muted small">
+                &copy; @DateTime.Now.Year - WorkAxis HRMS - Everything revolves around people
+            </div>
+        </div>
+    </div>
+</footer>

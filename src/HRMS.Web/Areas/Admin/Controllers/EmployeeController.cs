@@ -108,7 +108,7 @@ public class EmployeeController : Controller
             DesignationId = result.Data.DesignationId,
             ReportingManagerId = result.Data.ReportingManagerId,
             RelievingDate = result.Data.RelievingDate,
-            Status = (int)Enum.Parse<EmployeeStatus>(result.Data.Status)
+            Status = result.Data.Status  // Already an int, no parsing needed
         };
 
         await PopulateDropdownsAsync(updateDto.DepartmentId, updateDto.DesignationId, updateDto.ReportingManagerId);

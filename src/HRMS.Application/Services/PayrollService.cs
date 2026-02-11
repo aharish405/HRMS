@@ -6,7 +6,9 @@ using HRMS.Domain.Enums;
 using HRMS.Domain.Interfaces;
 using HRMS.Shared.Models;
 using iText.Kernel.Colors;
+using iText.Kernel.Font;
 using iText.Kernel.Pdf;
+using iText.IO.Font.Constants;
 using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
@@ -148,6 +150,9 @@ public class PayrollService : IPayrollService
             }
 
             var generatedPayrolls = new List<Payroll>();
+            var daysInMonth = DateTime.DaysInMonth(dto.Year, dto.Month);
+            var monthStart = new DateTime(dto.Year, dto.Month, 1);
+            var monthEnd = monthStart.AddMonths(1).AddDays(-1);
 
             foreach (var employee in employees)
             {
@@ -172,10 +177,33 @@ public class PayrollService : IPayrollService
                     continue;
                 }
 
-                // Calculate working days (simplified - assumes 30 days per month)
-                var workingDays = 30;
-                var presentDays = workingDays; // In real scenario, get from attendance
-                var leaveDays = 0; // Get from leave records
+                // --- Pro-Rata Calculation Logic ---
+                var paidDays = daysInMonth; // Default to full month
+                var isProRated = false;
+                DateTime? joiningDateRef = null;
+
+                if (employee.JoiningDate.Year == dto.Year && employee.JoiningDate.Month == dto.Month)
+                {
+                    // Joined during this month
+                    paidDays = (monthEnd - employee.JoiningDate).Days + 1;
+                    paidDays = Math.Max(0, paidDays); // Validated non-negative
+                    isProRated = paidDays < daysInMonth;
+                    joiningDateRef = employee.JoiningDate;
+                }
+                else if (employee.JoiningDate > monthEnd)
+                {
+                    // Future joining date (shouldn't happen for active, but safe guard)
+                    paidDays = 0;
+                    isProRated = true;
+                }
+
+                // Calculate ratio
+                var ratio = (decimal)paidDays / daysInMonth;
+                
+                // Attendance (Simplified: Assumes present for all paid days)
+                var workingDays = daysInMonth; // Standardize to calendar days for this calculation
+                var presentDays = paidDays;
+                var leaveDays = 0; 
                 var absentDays = workingDays - presentDays - leaveDays;
 
                 // Create payroll
@@ -184,30 +212,51 @@ public class PayrollService : IPayrollService
                     EmployeeId = employee.Id,
                     Month = dto.Month,
                     Year = dto.Year,
+                    
+                    // Stats
                     WorkingDays = workingDays,
+                    TotalCalendarDays = daysInMonth,
+                    PaidDays = paidDays,
+                    IsProRated = isProRated,
+                    JoiningDate = joiningDateRef,
                     PresentDays = presentDays,
                     LeaveDays = leaveDays,
                     AbsentDays = absentDays,
-                    BasicSalary = activeSalary.BasicSalary,
-                    HRA = activeSalary.HRA,
-                    ConveyanceAllowance = activeSalary.ConveyanceAllowance,
-                    MedicalAllowance = activeSalary.MedicalAllowance,
-                    SpecialAllowance = activeSalary.SpecialAllowance,
-                    OtherAllowances = activeSalary.OtherAllowances,
-                    GrossSalary = activeSalary.GrossSalary,
-                    PF = activeSalary.PF,
-                    ESI = activeSalary.ESI,
-                    ProfessionalTax = activeSalary.ProfessionalTax,
-                    TDS = activeSalary.TDS,
-                    OtherDeductions = activeSalary.OtherDeductions,
-                    TotalDeductions = activeSalary.TotalDeductions,
-                    NetSalary = activeSalary.NetSalary,
+
+                    // Earnings (Pro-Rated)
+                    BasicSalary = Math.Round(activeSalary.BasicSalary * ratio, 2),
+                    HRA = Math.Round(activeSalary.HRA * ratio, 2),
+                    ConveyanceAllowance = Math.Round(activeSalary.ConveyanceAllowance * ratio, 2),
+                    MedicalAllowance = Math.Round(activeSalary.MedicalAllowance * ratio, 2),
+                    SpecialAllowance = Math.Round(activeSalary.SpecialAllowance * ratio, 2),
+                    OtherAllowances = Math.Round(activeSalary.OtherAllowances * ratio, 2),
+                    
+                    // Deductions (Pro-Rated)
+                    PF = Math.Round(activeSalary.PF * ratio, 2),
+                    ESI = Math.Round(activeSalary.ESI * ratio, 2),
+                    ProfessionalTax = Math.Round(activeSalary.ProfessionalTax * ratio, 2),
+                    TDS = Math.Round(activeSalary.TDS * ratio, 2),
+                    OtherDeductions = Math.Round(activeSalary.OtherDeductions * ratio, 2),
+                    
                     IsProcessed = true,
                     ProcessedOn = DateTime.UtcNow,
                     ProcessedBy = createdBy,
                     CreatedBy = createdBy,
                     CreatedOn = DateTime.UtcNow
                 };
+
+                // Recalculate Totals based on pro-rated components
+                payroll.GrossSalary = payroll.BasicSalary + payroll.HRA + payroll.ConveyanceAllowance + 
+                                      payroll.MedicalAllowance + payroll.SpecialAllowance + payroll.OtherAllowances;
+                
+                payroll.TotalDeductions = payroll.PF + payroll.ESI + payroll.ProfessionalTax + 
+                                          payroll.TDS + payroll.OtherDeductions;
+                
+                payroll.NetSalary = payroll.GrossSalary - payroll.TotalDeductions;
+                
+                // Store Per-Day Reference (based on Master Salary / Calendar Days)
+                payroll.PerDaySalary = daysInMonth > 0 ? Math.Round(activeSalary.GrossSalary / daysInMonth, 2) : 0;
+
 
                 await payrollRepo.AddAsync(payroll);
                 generatedPayrolls.Add(payroll);
@@ -255,10 +304,11 @@ public class PayrollService : IPayrollService
             using var document = new Document(pdf);
 
             // Add company header
+            var boldFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
             var header = new Paragraph("WorkAxis HRMS")
                 .SetTextAlignment(TextAlignment.CENTER)
                 .SetFontSize(20)
-                .SetBold();
+                .SetFont(boldFont);
             document.Add(header);
 
             var subHeader = new Paragraph("Payslip")
@@ -287,10 +337,18 @@ public class PayrollService : IPayrollService
             AddCell(empTable, "Designation:", true);
             AddCell(empTable, payroll.Employee.Designation.Title, false);
 
-            AddCell(empTable, "Working Days:", true);
-            AddCell(empTable, payroll.WorkingDays.ToString(), false);
-            AddCell(empTable, "Present Days:", true);
-            AddCell(empTable, payroll.PresentDays.ToString(), false);
+            if (payroll.IsProRated && payroll.JoiningDate.HasValue)
+            {
+                AddCell(empTable, "Joining Date:", true);
+                AddCell(empTable, payroll.JoiningDate.Value.ToString("dd MMM yyyy"), false);
+                AddCell(empTable, "Remarks:", true);
+                AddCell(empTable, "Pro-Rated Salary", false);
+            }
+
+            AddCell(empTable, "Calendar Days:", true);
+            AddCell(empTable, payroll.TotalCalendarDays.ToString(), false);
+            AddCell(empTable, "Paid Days:", true);
+            AddCell(empTable, payroll.PaidDays.ToString(), false);
 
             document.Add(empTable);
             document.Add(new Paragraph("\n"));
@@ -323,16 +381,17 @@ public class PayrollService : IPayrollService
             var netSalaryPara = new Paragraph($"Net Salary: ₹{payroll.NetSalary:N2}")
                 .SetTextAlignment(TextAlignment.RIGHT)
                 .SetFontSize(14)
-                .SetBold();
+                .SetFont(boldFont);
             document.Add(netSalaryPara);
 
             document.Add(new Paragraph("\n\n"));
 
             // Footer
+            var italicFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_OBLIQUE);
             var footer = new Paragraph("This is a computer-generated payslip and does not require a signature.")
                 .SetTextAlignment(TextAlignment.CENTER)
                 .SetFontSize(8)
-                .SetItalic();
+                .SetFont(italicFont);
             document.Add(footer);
 
             document.Close();
@@ -394,15 +453,20 @@ public class PayrollService : IPayrollService
     private static void AddCell(Table table, string text, bool isBold)
     {
         var cell = new Cell().Add(new Paragraph(text));
-        if (isBold) cell.SetBold();
+        if (isBold)
+        {
+            var boldFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+            cell.SetFont(boldFont);
+        }
         table.AddCell(cell);
     }
 
     private static void AddHeaderCell(Table table, string text)
     {
+        var boldFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
         var cell = new Cell().Add(new Paragraph(text))
             .SetBackgroundColor(ColorConstants.LIGHT_GRAY)
-            .SetBold()
+            .SetFont(boldFont)
             .SetTextAlignment(TextAlignment.CENTER);
         table.AddCell(cell);
     }
@@ -417,9 +481,10 @@ public class PayrollService : IPayrollService
 
     private static void AddTotalRow(Table table, string earning, decimal earningAmount, string deduction, decimal deductionAmount)
     {
-        table.AddCell(new Cell().Add(new Paragraph(earning)).SetBold().SetBackgroundColor(ColorConstants.LIGHT_GRAY));
-        table.AddCell(new Cell().Add(new Paragraph(earningAmount.ToString("N2"))).SetBold().SetBackgroundColor(ColorConstants.LIGHT_GRAY).SetTextAlignment(TextAlignment.RIGHT));
-        table.AddCell(new Cell().Add(new Paragraph(deduction)).SetBold().SetBackgroundColor(ColorConstants.LIGHT_GRAY));
-        table.AddCell(new Cell().Add(new Paragraph(deductionAmount.ToString("N2"))).SetBold().SetBackgroundColor(ColorConstants.LIGHT_GRAY).SetTextAlignment(TextAlignment.RIGHT));
+        var boldFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+        table.AddCell(new Cell().Add(new Paragraph(earning).SetFont(boldFont)).SetBackgroundColor(ColorConstants.LIGHT_GRAY));
+        table.AddCell(new Cell().Add(new Paragraph(earningAmount.ToString("N2")).SetFont(boldFont)).SetBackgroundColor(ColorConstants.LIGHT_GRAY).SetTextAlignment(TextAlignment.RIGHT));
+        table.AddCell(new Cell().Add(new Paragraph(deduction).SetFont(boldFont)).SetBackgroundColor(ColorConstants.LIGHT_GRAY));
+        table.AddCell(new Cell().Add(new Paragraph(deductionAmount.ToString("N2")).SetFont(boldFont)).SetBackgroundColor(ColorConstants.LIGHT_GRAY).SetTextAlignment(TextAlignment.RIGHT));
     }
 }

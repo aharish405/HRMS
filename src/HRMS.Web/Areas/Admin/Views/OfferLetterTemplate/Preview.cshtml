@@ -1,0 +1,27 @@
+@{
+    ViewData["Title"] = "Template Preview";
+    var templateName = ViewBag.TemplateName as string;
+    var previewContent = ViewBag.PreviewContent as string;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="bi bi-eye"></i> Preview: @templateName
+        </h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <div class="alert alert-info mb-0">
+                <i class="bi bi-info-circle"></i> This is a preview with sample data. Actual offer letters will use real candidate and company information.
+            </div>
+        </div>
+        <div class="card-body p-4" style="background: white;">
+            @Html.Raw(previewContent)
+        </div>
+    </div>
+</div>

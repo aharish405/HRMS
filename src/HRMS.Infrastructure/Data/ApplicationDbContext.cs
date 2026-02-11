@@ -25,6 +25,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
     public DbSet<OfferLetter> OfferLetters => Set<OfferLetter>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<OfferLetterTemplate> OfferLetterTemplates => Set<OfferLetterTemplate>();
+    public DbSet<TemplatePlaceholder> TemplatePlaceholders => Set<TemplatePlaceholder>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

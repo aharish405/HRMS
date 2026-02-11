@@ -14,6 +14,12 @@ public class PayrollDto
     public string MonthYear => $"{GetMonthName(Month)} {Year}";
 
     public int WorkingDays { get; set; }
+    public int TotalCalendarDays { get; set; }
+    public int PaidDays { get; set; }
+    public bool IsProRated { get; set; }
+    public DateTime? JoiningDate { get; set; }
+    public decimal PerDaySalary { get; set; }
+
     public int PresentDays { get; set; }
     public int LeaveDays { get; set; }
     public int AbsentDays { get; set; }

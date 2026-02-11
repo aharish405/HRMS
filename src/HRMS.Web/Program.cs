@@ -72,6 +72,7 @@ builder.Services.AddScoped<HRMS.Application.Interfaces.ISalaryService, HRMS.Appl
 builder.Services.AddScoped<HRMS.Application.Interfaces.IPayrollService, HRMS.Application.Services.PayrollService>();
 builder.Services.AddScoped<HRMS.Application.Interfaces.ILeaveService, HRMS.Application.Services.LeaveService>();
 builder.Services.AddScoped<HRMS.Application.Interfaces.IOfferLetterService, HRMS.Application.Services.OfferLetterService>();
+builder.Services.AddScoped<HRMS.Application.Interfaces.IOfferLetterTemplateService, HRMS.Application.Services.OfferLetterTemplateService>();
 
 // Configure Authorization Policies
 builder.Services.AddAuthorization(options =>
@@ -168,3 +169,5 @@ finally
 {
     Log.CloseAndFlush();
 }
+
+public partial class Program { }

@@ -2,8 +2,9 @@ namespace HRMS.Domain.Enums;
 
 public enum EmployeeStatus
 {
-    Active = 1,
-    OnNotice = 2,
-    Relieved = 3,
-    Terminated = 4
+    Draft = 0,        // Initial state - before offer acceptance
+    Active = 1,       // Activated after offer acceptance
+    OnNotice = 2,     // Employee has resigned
+    Relieved = 3,     // Employee has left
+    Terminated = 4    // Terminated by company
 }

@@ -12,7 +12,16 @@ public class Employee : AuditableEntity
     public string? Phone { get; set; }
     public DateTime DateOfBirth { get; set; }
     public Gender Gender { get; set; }
-    public string? Address { get; set; }
+    public string? Address { get; set; } // Kept for backward compatibility/fallback
+
+    // KYC Details
+    public string PanNumber { get; set; } = string.Empty;
+    public string AadharNumber { get; set; } = string.Empty;
+    public string? BloodGroup { get; set; }
+
+    // Emergency Contact
+    public string? EmergencyContactName { get; set; }
+    public string? EmergencyContactPhone { get; set; }
 
     // Employment Details
     public int DepartmentId { get; set; }
@@ -35,6 +44,7 @@ public class Employee : AuditableEntity
     public ICollection<LeaveRequest> LeaveRequests { get; set; } = new List<LeaveRequest>();
     public ICollection<LeaveBalance> LeaveBalances { get; set; } = new List<LeaveBalance>();
     public ICollection<OfferLetter> OfferLetters { get; set; } = new List<OfferLetter>();
+    public ICollection<EmployeeAddress> Addresses { get; set; } = new List<EmployeeAddress>();
 
     // Computed Property
     public string FullName => $"{FirstName} {LastName}";

@@ -44,4 +44,20 @@ public class UpdateEmployeeDto
 
     [Required]
     public int Status { get; set; }
+
+    // KYC Details
+    [Required(ErrorMessage = "PAN Number is required")]
+    [RegularExpression(@"^[A-Z]{5}[0-9]{4}[A-Z]{1}$", ErrorMessage = "Invalid PAN Number format")]
+    public string PanNumber { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Aadhar Number is required")]
+    [StringLength(12, MinimumLength = 12, ErrorMessage = "Aadhar Number must be exactly 12 digits")]
+    [RegularExpression(@"^\d{12}$", ErrorMessage = "Aadhar Number must contain only digits")]
+    public string AadharNumber { get; set; } = string.Empty;
+
+    public string? BloodGroup { get; set; }
+    public string? EmergencyContactName { get; set; }
+    
+    [Phone]
+    public string? EmergencyContactPhone { get; set; }
 }

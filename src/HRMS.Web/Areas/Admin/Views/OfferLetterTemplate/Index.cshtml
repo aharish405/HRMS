@@ -1,0 +1,151 @@
+@model IEnumerable<HRMS.Application.DTOs.OfferLetterTemplate.OfferLetterTemplateDto>
+
+@{
+    ViewData["Title"] = "Offer Letter Templates";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-end align-items-center mb-4">
+        <div>
+            <a asp-action="Placeholders" class="btn btn-outline-info me-2">
+                <i class="bi bi-tags"></i> View Placeholders
+            </a>
+            <a asp-action="Create" class="btn btn-primary me-2">
+                <i class="bi bi-plus-circle"></i> Create Template
+            </a>
+            <a asp-action="BulkGenerate" class="btn btn-success">
+                <i class="bi bi-file-earmark-plus"></i> Bulk Generate Offers
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th>Version</th>
+                                    <th>Status</th>
+                                    <th>Default</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var template in Model)
+                            {
+                                        <tr>
+                                            <td>
+                                                <strong>@template.Name</strong>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">@template.Description</small>
+                                            </td>
+                                            <td>
+                                        @if (!string.IsNullOrEmpty(template.Category))
+                                        {
+                                                        <span class="badge bg-info">@template.Category</span>
+                                        }
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">v@template.Version</span>
+                                            </td>
+                                            <td>
+                                        @if (template.IsActive)
+                                        {
+                                                        <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                                        <span class="badge bg-secondary">Inactive</span>
+                                        }
+                                            </td>
+                                            <td>
+                                        @if (template.IsDefault)
+                                        {
+                                                        <i class="bi bi-star-fill text-warning" title="Default Template"></i>
+                                        }
+                                        else
+                                        {
+                                                        <form asp-action="SetDefault" asp-route-id="@template.Id" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                            <button type="submit" class="btn btn-sm btn-link p-0" title="Set as Default">
+                                                                <i class="bi bi-star"></i>
+                                                            </button>
+                                                        </form>
+                                        }
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">
+                                            @template.CreatedOn.ToString("MMM dd, yyyy")
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="Preview" asp-route-id="@template.Id" class="btn btn-sm btn-outline-info" title="Preview">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a asp-action="Edit" asp-route-id="@template.Id" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <form asp-action="Clone" asp-route-id="@template.Id" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-sm btn-outline-secondary" title="Clone">
+                                                            <i class="bi bi-files"></i>
+                                                        </button>
+                                                    </form>
+                                            @if (!template.IsDefault)
+                                            {
+                                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal@(template.Id)" title="Delete">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                            }
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Delete Confirmation Modal -->
+                                        <div class="modal fade" id="deleteModal@(template.Id)" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Confirm Delete</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Are you sure you want to delete the template "<strong>@template.Name</strong>"?
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <form asp-action="Delete" asp-route-id="@template.Id" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+            }
+            else
+            {
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox display-1 text-muted"></i>
+                        <p class="lead mt-3">No templates found</p>
+                        <a asp-action="Create" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Create Your First Template
+                        </a>
+                    </div>
+            }
+        </div>
+    </div>
+</div>

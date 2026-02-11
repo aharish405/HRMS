@@ -9,8 +9,14 @@ public class Payroll : AuditableEntity
     public int Month { get; set; }
     public int Year { get; set; }
 
-    // Attendance
-    public int WorkingDays { get; set; }
+    // Attendance & Pro-Rata Info
+    public int WorkingDays { get; set; } // Scheduled working days (e.g. 22)
+    public int TotalCalendarDays { get; set; } // Total days in month (e.g. 30, 31)
+    public int PaidDays { get; set; } // Days eligible for pay
+    public bool IsProRated { get; set; }
+    public DateTime? JoiningDate { get; set; } // For reference if pro-rated
+    public decimal PerDaySalary { get; set; } // Computed daily rate
+
     public int PresentDays { get; set; }
     public int LeaveDays { get; set; }
     public int AbsentDays { get; set; }

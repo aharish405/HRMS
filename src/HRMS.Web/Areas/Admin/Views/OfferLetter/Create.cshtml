@@ -12,10 +12,34 @@
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="card mb-3">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-file-text"></i> Template Selection</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="TemplateId" class="form-label">Offer Letter Template</label>
+                        <select asp-for="TemplateId" class="form-select" asp-items="ViewBag.Templates">
+                            <option value="">-- Select Template --</option>
+                        </select>
+                         <span asp-validation-for="TemplateId" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="bi bi-person"></i> Candidate Information</h5>
                 </div>
                 <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label asp-for="EmployeeId" class="form-label">Link to Draft Employee (Optional)</label>
+                            <select asp-for="EmployeeId" class="form-select" asp-items="ViewBag.Employees">
+                                <option value="">-- Select Draft Employee --</option>
+                            </select>
+                            <small class="text-muted">Selecting an employee will auto-populate candidate details.</small>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label asp-for="CandidateName" class="form-label">Full Name</label>
@@ -99,29 +123,96 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label asp-for="ConveyanceAllowance" class="form-label">Conveyance Allowance</label>
-                            <input asp-for="ConveyanceAllowance" type="number" step="0.01" class="form-control salary-input" />
+                            <input asp-for="ConveyanceAllowance" type="number" step="0.01"
+                                class="form-control salary-input" />
                             <span asp-validation-for="ConveyanceAllowance" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label asp-for="MedicalAllowance" class="form-label">Medical Allowance</label>
-                            <input asp-for="MedicalAllowance" type="number" step="0.01" class="form-control salary-input" />
+                            <input asp-for="MedicalAllowance" type="number" step="0.01"
+                                class="form-control salary-input" />
                             <span asp-validation-for="MedicalAllowance" class="text-danger"></span>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label asp-for="SpecialAllowance" class="form-label">Special Allowance</label>
-                            <input asp-for="SpecialAllowance" type="number" step="0.01" class="form-control salary-input" />
+                            <input asp-for="SpecialAllowance" type="number" step="0.01"
+                                class="form-control salary-input" />
                             <span asp-validation-for="SpecialAllowance" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label asp-for="OtherAllowances" class="form-label">Other Allowances</label>
-                            <input asp-for="OtherAllowances" type="number" step="0.01" class="form-control salary-input" />
+                            <input asp-for="OtherAllowances" type="number" step="0.01"
+                                class="form-control salary-input" />
                             <span asp-validation-for="OtherAllowances" class="text-danger"></span>
                         </div>
                     </div>
-                    <div class="alert alert-info">
-                        <strong>Total CTC: ₹<span id="totalCTC">0.00</span></strong>
+                    <div class="alert alert-success">
+                        <strong>Gross Salary: ₹<span id="grossSalary">0.00</span></strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-dash-circle"></i> Deductions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PF" class="form-label">PF (Provident Fund)</label>
+                            <input asp-for="PF" type="number" step="0.01" class="form-control deduction-input" />
+                            <span asp-validation-for="PF" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ESI" class="form-label">ESI (Employee State Insurance)</label>
+                            <input asp-for="ESI" type="number" step="0.01" class="form-control deduction-input" />
+                            <span asp-validation-for="ESI" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ProfessionalTax" class="form-label">Professional Tax</label>
+                            <input asp-for="ProfessionalTax" type="number" step="0.01"
+                                class="form-control deduction-input" />
+                            <span asp-validation-for="ProfessionalTax" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TDS" class="form-label">TDS (Tax Deducted at Source)</label>
+                            <input asp-for="TDS" type="number" step="0.01" class="form-control deduction-input" />
+                            <span asp-validation-for="TDS" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="OtherDeductions" class="form-label">Other Deductions</label>
+                            <input asp-for="OtherDeductions" type="number" step="0.01"
+                                class="form-control deduction-input" />
+                            <span asp-validation-for="OtherDeductions" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="alert alert-danger">
+                        <strong>Total Deductions: ₹<span id="totalDeductions">0.00</span></strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-body bg-light">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h5>Total CTC (Annual)</h5>
+                            <h3 class="text-success">₹<span id="totalCTC">0.00</span></h3>
+                        </div>
+                        <div class="col-md-4">
+                            <h5>Net Salary (Annual)</h5>
+                            <h3 class="text-primary">₹<span id="netSalary">0.00</span></h3>
+                        </div>
+                        <div class="col-md-4">
+                            <h5>Net Salary (Monthly)</h5>
+                            <h3 class="text-info">₹<span id="monthlySalary">0.00</span></h3>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -132,7 +223,8 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <label asp-for="AdditionalTerms" class="form-label">Additional Terms & Conditions (Optional)</label>
+                        <label asp-for="AdditionalTerms" class="form-label">Additional Terms & Conditions
+                            (Optional)</label>
                         <textarea asp-for="AdditionalTerms" class="form-control" rows="4"></textarea>
                         <span asp-validation-for="AdditionalTerms" class="text-danger"></span>
                     </div>
@@ -152,10 +244,11 @@
 </div>
 
 @section Scripts {
-        <partial name="_ValidationScriptsPartial" />
-        <script>
+    <partial name="_ValidationScriptsPartial" />
+    <script>
             $(document).ready(function() {
-                function calculateCTC() {
+                function calculateTotals() {
+                    // Get allowances
                     var basic = parseFloat($('#BasicSalary').val()) || 0;
                     var hra = parseFloat($('#HRA').val()) || 0;
                     var conveyance = parseFloat($('#ConveyanceAllowance').val()) || 0;
@@ -163,13 +256,47 @@
                     var special = parseFloat($('#SpecialAllowance').val()) || 0;
                     var other = parseFloat($('#OtherAllowances').val()) || 0;
 
-                    var ctc = basic + hra + conveyance + medical + special + other;
+                    // Get deductions
+                    var pf = parseFloat($('#PF').val()) || 0;
+                    var esi = parseFloat($('#ESI').val()) || 0;
+                    var pt = parseFloat($('#ProfessionalTax').val()) || 0;
+                    var tds = parseFloat($('#TDS').val()) || 0;
+                    var otherDeductions = parseFloat($('#OtherDeductions').val()) || 0;
 
-                    $('#totalCTC').text(ctc.toFixed(2));
+                    // Calculate totals
+                    var grossSalary = basic + hra + conveyance + medical + special + other;
+                    var totalDeductions = pf + esi + pt + tds + otherDeductions;
+                    var netSalary = grossSalary - totalDeductions;
+                    var monthlySalary = netSalary / 12;
+
+                    // Update display
+                    $('#grossSalary').text(grossSalary.toFixed(2));
+                    $('#totalCTC').text(grossSalary.toFixed(2));
+                    $('#totalDeductions').text(totalDeductions.toFixed(2));
+                    $('#netSalary').text(netSalary.toFixed(2));
+                    $('#monthlySalary').text(monthlySalary.toFixed(2));
                 }
 
-                $('.salary-input').on('input', calculateCTC);
-                calculateCTC();
+                $('.salary-input, .deduction-input').on('input', calculateTotals);
+                calculateTotals();
+
+                // Auto-populate candidate details
+                $('#EmployeeId').change(function() {
+                    var empId = $(this).val();
+                    if (empId) {
+                        $.get('/Admin/OfferLetter/GetEmployeeDetails/' + empId, function(data) {
+                            $('#CandidateName').val(data.candidateName);
+                            $('#CandidateEmail').val(data.candidateEmail);
+                            $('#CandidatePhone').val(data.candidatePhone);
+                            $('#CandidateAddress').val(data.candidateAddress);
+                            
+                            if (data.departmentId) $('#DepartmentId').val(data.departmentId);
+                            if (data.designationId) $('#DesignationId').val(data.designationId);
+                        }).fail(function() {
+                            alert('Failed to fetch employee details.');
+                        });
+                    }
+                });
             });
         </script>
 }

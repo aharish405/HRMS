@@ -4,5 +4,5 @@ public abstract class BaseEntity
 {
     public int Id { get; set; }
     public bool IsDeleted { get; set; }
-    public byte[] RowVersion { get; set; } = null!;
+    public byte[]? RowVersion { get; set; }
 }

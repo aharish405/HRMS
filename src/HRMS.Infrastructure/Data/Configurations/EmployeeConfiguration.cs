@@ -39,6 +39,30 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         builder.Property(e => e.Address)
             .HasMaxLength(500);
 
+        // KYC Configuration
+        builder.Property(e => e.PanNumber)
+            .IsRequired()
+            .HasMaxLength(10);
+        
+        builder.HasIndex(e => e.PanNumber)
+            .IsUnique();
+
+        builder.Property(e => e.AadharNumber)
+            .IsRequired()
+            .HasMaxLength(12);
+
+        builder.HasIndex(e => e.AadharNumber)
+            .IsUnique();
+
+        builder.Property(e => e.BloodGroup)
+            .HasMaxLength(5);
+
+        builder.Property(e => e.EmergencyContactName)
+            .HasMaxLength(100);
+
+        builder.Property(e => e.EmergencyContactPhone)
+            .HasMaxLength(20);
+
         builder.Property(e => e.UserId)
             .HasMaxLength(450);
 

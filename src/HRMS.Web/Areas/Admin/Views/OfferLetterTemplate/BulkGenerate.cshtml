@@ -1,0 +1,204 @@
+@model HRMS.Application.DTOs.OfferLetter.BulkOfferGenerationDto
+
+@{
+    ViewData["Title"] = "Bulk Generate Offer Letters";
+    var templates = ViewBag.Templates as IEnumerable<HRMS.Application.DTOs.OfferLetterTemplate.OfferLetterTemplateDto>;
+    var departments = ViewBag.Departments as IEnumerable<HRMS.Application.DTOs.Department.DepartmentDto>;
+    var designations = ViewBag.Designations as IEnumerable<HRMS.Application.DTOs.Designation.DesignationDto>;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="bi bi-file-earmark-plus"></i> Bulk Generate Offer Letters
+        </h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Templates
+        </a>
+    </div>
+
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Generate multiple offer letters at once using a template. Fill in the details
+        for each candidate below.
+    </div>
+
+    <form asp-action="BulkGenerate" method="post" id="bulkGenerateForm">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-gear"></i> Template & Company Settings</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="TemplateId" class="form-label">Select Template <span
+                                class="text-danger">*</span></label>
+                        <select asp-for="TemplateId" class="form-select">
+                            <option value="">-- Select Template --</option>
+                            @if (templates != null)
+                            {
+                                foreach (var template in templates.Where(t => t.IsActive))
+                                {
+                                    <option value="@template.Id" selected="@(template.IsDefault)">
+                                        @template.Name @(template.IsDefault ? "(Default)" : "")
+                                    </option>
+                                }
+                            }
+                        </select>
+                        <span asp-validation-for="TemplateId" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="CompanyName" class="form-label">Company Name</label>
+                        <input asp-for="CompanyName" class="form-control" value="WorkAxis Technologies" />
+                        <span asp-validation-for="CompanyName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="CompanyAddress" class="form-label">Company Address</label>
+                        <input asp-for="CompanyAddress" class="form-control" placeholder="Company address" />
+                        <span asp-validation-for="CompanyAddress" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-people"></i> Candidate Details</h5>
+                <button type="button" class="btn btn-light btn-sm" onclick="addCandidate()">
+                    <i class="bi bi-plus-circle"></i> Add Candidate
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="candidatesContainer">
+                    <!-- Candidates will be added here dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-success btn-lg">
+                <i class="bi bi-file-earmark-plus"></i> Generate Offer Letters
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        let candidateIndex = 0;
+
+        function addCandidate() {
+            const container = document.getElementById('candidatesContainer');
+            const candidateHtml = `
+                    <div class="candidate-card card mb-3" data-index="${candidateIndex}">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">Candidate #${candidateIndex + 1}</h6>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="removeCandidate(${candidateIndex})">
+                                <i class="bi bi-trash"></i> Remove
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Candidate Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="Employees[${candidateIndex}].CandidateName" class="form-control" required />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Email <span class="text-danger">*</span></label>
+                                    <input type="email" name="Employees[${candidateIndex}].CandidateEmail" class="form-control" required />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Phone</label>
+                                    <input type="text" name="Employees[${candidateIndex}].CandidatePhone" class="form-control" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Address</label>
+                                    <input type="text" name="Employees[${candidateIndex}].CandidateAddress" class="form-control" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Department <span class="text-danger">*</span></label>
+                                    <select name="Employees[${candidateIndex}].DepartmentId" class="form-select" required>
+                                        <option value="">-- Select --</option>
+        @if (departments != null)
+        {
+            foreach (var dept in departments)
+            {
+                <text><option value="@dept.Id">@dept.Name</option></text>
+            }
+        }
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Designation <span class="text-danger">*</span></label>
+                                    <select name="Employees[${candidateIndex}].DesignationId" class="form-select" required>
+                                        <option value="">-- Select --</option>
+        @if (designations != null)
+        {
+            foreach (var desig in designations)
+            {
+                <text><option value="@desig.Id">@desig.Title</option></text>
+            }
+        }
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Joining Date <span class="text-danger">*</span></label>
+                                    <input type="date" name="Employees[${candidateIndex}].JoiningDate" class="form-control" required />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Location <span class="text-danger">*</span></label>
+                                    <input type="text" name="Employees[${candidateIndex}].Location" class="form-control" placeholder="e.g., Bangalore" required />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Basic Salary <span class="text-danger">*</span></label>
+                                    <input type="number" name="Employees[${candidateIndex}].BasicSalary" class="form-control" step="0.01" required />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">HRA</label>
+                                    <input type="number" name="Employees[${candidateIndex}].HRA" class="form-control" step="0.01" value="0" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Conveyance Allowance</label>
+                                    <input type="number" name="Employees[${candidateIndex}].ConveyanceAllowance" class="form-control" step="0.01" value="0" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Medical Allowance</label>
+                                    <input type="number" name="Employees[${candidateIndex}].MedicalAllowance" class="form-control" step="0.01" value="0" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Special Allowance</label>
+                                    <input type="number" name="Employees[${candidateIndex}].SpecialAllowance" class="form-control" step="0.01" value="0" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Other Allowances</label>
+                                    <input type="number" name="Employees[${candidateIndex}].OtherAllowances" class="form-control" step="0.01" value="0" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">CTC (Annual) <span class="text-danger">*</span></label>
+                                    <input type="number" name="Employees[${candidateIndex}].CTC" class="form-control" step="0.01" required />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            container.insertAdjacentHTML('beforeend', candidateHtml);
+            candidateIndex++;
+        }
+
+        function removeCandidate(index) {
+            const card = document.querySelector(`[data-index="${index}"]`);
+            if (card) {
+                card.remove();
+            }
+        }
+
+        // Add first candidate on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            addCandidate();
+        });
+    </script>
+}

@@ -5,12 +5,28 @@
 
 <div class="row mb-3">
     <div class="col-md-8">
-        <h2><i class="bi bi-cash-stack"></i> Salary Details</h2>
+        <h2>
+            <i class="bi bi-cash-stack"></i> Salary Details
+            @if (Model.IsSystemGenerated)
+            {
+                <span class="badge bg-primary ms-2">
+                    <i class="bi bi-robot"></i> System Generated
+                </span>
+            }
+        </h2>
+        @if (Model.OfferLetterId != null)
+        {
+            <div class="alert alert-info mt-2">
+                <i class="bi bi-link-45deg"></i>
+                This salary was created from
+                <a asp-area="Admin" asp-controller="OfferLetter" asp-action="Details" asp-route-id="@Model.OfferLetterId"
+                    class="alert-link">
+                    Offer Letter #@Model.OfferLetterId
+                </a>
+            </div>
+        }
     </div>
     <div class="col-md-4 text-end">
-        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
-            <i class="bi bi-pencil"></i> Edit
-        </a>
         <a asp-action="Index" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Back
         </a>
@@ -65,34 +81,50 @@
             </div>
             <div class="card-body">
                 <table class="table table-sm">
-                    <tr>
-                        <td>Basic Salary</td>
-                        <td class="text-end"><strong>₹@Model.BasicSalary.ToString("N2")</strong></td>
-                    </tr>
-                    <tr>
-                        <td>HRA</td>
-                        <td class="text-end">₹@Model.HRA.ToString("N2")</td>
-                    </tr>
-                    <tr>
-                        <td>Conveyance Allowance</td>
-                        <td class="text-end">₹@Model.ConveyanceAllowance.ToString("N2")</td>
-                    </tr>
-                    <tr>
-                        <td>Medical Allowance</td>
-                        <td class="text-end">₹@Model.MedicalAllowance.ToString("N2")</td>
-                    </tr>
-                    <tr>
-                        <td>Special Allowance</td>
-                        <td class="text-end">₹@Model.SpecialAllowance.ToString("N2")</td>
-                    </tr>
-                    <tr>
-                        <td>Other Allowances</td>
-                        <td class="text-end">₹@Model.OtherAllowances.ToString("N2")</td>
-                    </tr>
-                    <tr class="table-success">
-                        <td><strong>Gross Salary</strong></td>
-                        <td class="text-end"><strong>₹@Model.GrossSalary.ToString("N2")</strong></td>
-                    </tr>
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th class="text-end">Monthly</th>
+                            <th class="text-end">Annual</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Basic Salary</td>
+                            <td class="text-end">₹@((Model.BasicSalary / 12).ToString("N2"))</td>
+                            <td class="text-end"><strong>₹@Model.BasicSalary.ToString("N2")</strong></td>
+                        </tr>
+                        <tr>
+                            <td>HRA</td>
+                            <td class="text-end">₹@((Model.HRA / 12).ToString("N2"))</td>
+                            <td class="text-end">₹@Model.HRA.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td>Conveyance Allowance</td>
+                            <td class="text-end">₹@((Model.ConveyanceAllowance / 12).ToString("N2"))</td>
+                            <td class="text-end">₹@Model.ConveyanceAllowance.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td>Medical Allowance</td>
+                            <td class="text-end">₹@((Model.MedicalAllowance / 12).ToString("N2"))</td>
+                            <td class="text-end">₹@Model.MedicalAllowance.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td>Special Allowance</td>
+                            <td class="text-end">₹@((Model.SpecialAllowance / 12).ToString("N2"))</td>
+                            <td class="text-end">₹@Model.SpecialAllowance.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td>Other Allowances</td>
+                            <td class="text-end">₹@((Model.OtherAllowances / 12).ToString("N2"))</td>
+                            <td class="text-end">₹@Model.OtherAllowances.ToString("N2")</td>
+                        </tr>
+                        <tr class="table-success">
+                            <td><strong>Gross Salary</strong></td>
+                            <td class="text-end"><strong>₹@((Model.GrossSalary / 12).ToString("N2"))</strong></td>
+                            <td class="text-end"><strong>₹@Model.GrossSalary.ToString("N2")</strong></td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -103,30 +135,45 @@
             </div>
             <div class="card-body">
                 <table class="table table-sm">
-                    <tr>
-                        <td>PF (Provident Fund)</td>
-                        <td class="text-end">₹@Model.PF.ToString("N2")</td>
-                    </tr>
-                    <tr>
-                        <td>ESI</td>
-                        <td class="text-end">₹@Model.ESI.ToString("N2")</td>
-                    </tr>
-                    <tr>
-                        <td>Professional Tax</td>
-                        <td class="text-end">₹@Model.ProfessionalTax.ToString("N2")</td>
-                    </tr>
-                    <tr>
-                        <td>TDS</td>
-                        <td class="text-end">₹@Model.TDS.ToString("N2")</td>
-                    </tr>
-                    <tr>
-                        <td>Other Deductions</td>
-                        <td class="text-end">₹@Model.OtherDeductions.ToString("N2")</td>
-                    </tr>
-                    <tr class="table-danger">
-                        <td><strong>Total Deductions</strong></td>
-                        <td class="text-end"><strong>₹@Model.TotalDeductions.ToString("N2")</strong></td>
-                    </tr>
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th class="text-end">Monthly</th>
+                            <th class="text-end">Annual</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>PF (Provident Fund)</td>
+                            <td class="text-end">₹@((Model.PF / 12).ToString("N2"))</td>
+                            <td class="text-end">₹@Model.PF.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td>ESI</td>
+                            <td class="text-end">₹@((Model.ESI / 12).ToString("N2"))</td>
+                            <td class="text-end">₹@Model.ESI.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td>Professional Tax</td>
+                            <td class="text-end">₹@((Model.ProfessionalTax / 12).ToString("N2"))</td>
+                            <td class="text-end">₹@Model.ProfessionalTax.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td>TDS</td>
+                            <td class="text-end">₹@((Model.TDS / 12).ToString("N2"))</td>
+                            <td class="text-end">₹@Model.TDS.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td>Other Deductions</td>
+                            <td class="text-end">₹@((Model.OtherDeductions / 12).ToString("N2"))</td>
+                            <td class="text-end">₹@Model.OtherDeductions.ToString("N2")</td>
+                        </tr>
+                        <tr class="table-danger">
+                            <td><strong>Total Deductions</strong></td>
+                            <td class="text-end"><strong>₹@((Model.TotalDeductions / 12).ToString("N2"))</strong></td>
+                            <td class="text-end"><strong>₹@Model.TotalDeductions.ToString("N2")</strong></td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -136,7 +183,7 @@
         <div class="card mb-3 bg-light">
             <div class="card-body text-center">
                 <h6 class="text-muted">Cost to Company (CTC)</h6>
-                <h2 class="text-info">₹@Model.CTC.ToString("N2")</h2>
+                <h2 class="text-info">₹@((Model.CTC > 0 ? Model.CTC : (Model.GrossSalary + Model.PF)).ToString("N2"))</h2>
                 <hr />
                 <h6 class="text-muted">Net Salary (Take Home)</h6>
                 <h2 class="text-success">₹@Model.NetSalary.ToString("N2")</h2>

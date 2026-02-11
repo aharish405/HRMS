@@ -27,10 +27,25 @@ public class OfferLetterDto
     public decimal OtherAllowances { get; set; }
     public decimal CTC { get; set; }
 
+    // Deduction Details
+    public decimal PF { get; set; }
+    public decimal ESI { get; set; }
+    public decimal ProfessionalTax { get; set; }
+    public decimal TDS { get; set; }
+    public decimal OtherDeductions { get; set; }
+
+    // Computed Fields
+    public decimal GrossSalary { get; set; }
+    public decimal TotalDeductions { get; set; }
+    public decimal NetSalary { get; set; }
+
     // Offer Details
     public DateTime JoiningDate { get; set; }
     public string Location { get; set; } = string.Empty;
     public string? AdditionalTerms { get; set; }
+
+    // Employee Link
+    public int? EmployeeId { get; set; }
 
     // Status
     public OfferLetterStatus Status { get; set; }

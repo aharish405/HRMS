@@ -22,11 +22,9 @@ public class OfferLetterConfiguration : IEntityTypeConfiguration<OfferLetter>
             .HasMaxLength(256);
 
         builder.Property(o => o.CandidatePhone)
-            .IsRequired()
             .HasMaxLength(20);
 
         builder.Property(o => o.CandidateAddress)
-            .IsRequired()
             .HasMaxLength(500);
 
         // Salary Details
@@ -49,6 +47,32 @@ public class OfferLetterConfiguration : IEntityTypeConfiguration<OfferLetter>
             .HasPrecision(18, 2);
 
         builder.Property(o => o.CTC)
+            .HasPrecision(18, 2);
+
+        // Deduction Details
+        builder.Property(o => o.PF)
+            .HasPrecision(18, 2);
+
+        builder.Property(o => o.ESI)
+            .HasPrecision(18, 2);
+
+        builder.Property(o => o.ProfessionalTax)
+            .HasPrecision(18, 2);
+
+        builder.Property(o => o.TDS)
+            .HasPrecision(18, 2);
+
+        builder.Property(o => o.OtherDeductions)
+            .HasPrecision(18, 2);
+
+        // Computed Fields
+        builder.Property(o => o.GrossSalary)
+            .HasPrecision(18, 2);
+
+        builder.Property(o => o.TotalDeductions)
+            .HasPrecision(18, 2);
+
+        builder.Property(o => o.NetSalary)
             .HasPrecision(18, 2);
 
         // Offer Details
@@ -84,9 +108,20 @@ public class OfferLetterConfiguration : IEntityTypeConfiguration<OfferLetter>
             .HasForeignKey(o => o.DesignationId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne(o => o.Template)
+            .WithMany()
+            .HasForeignKey(o => o.TemplateId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(o => o.Employee)
+            .WithMany(e => e.OfferLetters)
+            .HasForeignKey(o => o.EmployeeId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         // Indexes
         builder.HasIndex(o => o.CandidateEmail);
         builder.HasIndex(o => o.GeneratedOn);
         builder.HasIndex(o => o.Status);
+        builder.HasIndex(o => o.AcceptanceToken);
     }
 }

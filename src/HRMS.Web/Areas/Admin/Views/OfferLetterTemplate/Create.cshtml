@@ -1,0 +1,242 @@
+@model HRMS.Application.DTOs.OfferLetterTemplate.CreateOfferLetterTemplateDto
+
+@{
+    ViewData["Title"] = "Create Template";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="bi bi-plus-circle"></i> Create Offer Letter Template
+        </h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Template Name <span
+                                    class="text-danger">*</span></label>
+                            <input asp-for="Name" class="form-control"
+                                placeholder="e.g., Senior Developer Offer Letter" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description <span
+                                    class="text-danger">*</span></label>
+                            <textarea asp-for="Description" class="form-control" rows="2"
+                                placeholder="Brief description of this template"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Category" class="form-label">Category</label>
+                                <input asp-for="Category" class="form-control"
+                                    placeholder="e.g., Standard, Executive, Intern" />
+                                <span asp-validation-for="Category" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check mt-4">
+                                    <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                                    <label asp-for="IsActive" class="form-check-label">Active</label>
+                                </div>
+                                <div class="form-check">
+                                    <input asp-for="IsDefault" class="form-check-input" type="checkbox" />
+                                    <label asp-for="IsDefault" class="form-check-label">Set as Default Template</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Content" class="form-label">Template Content (HTML) <span
+                                    class="text-danger">*</span></label>
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> Use placeholders like <code>{{CANDIDATE_NAME}}</code>,
+                                <code>{{DESIGNATION}}</code>, etc.
+                                <a asp-action="Placeholders" target="_blank">View all available placeholders</a>
+                                <br/>
+                                <i class="bi bi-file-earmark-break"></i> Use <strong>Page Break</strong> button to indicate start of a new page.
+                            </div>
+                            <div class="summernote-wrapper">
+                                <textarea asp-for="Content" class="form-control font-monospace" rows="20"
+                                    style="font-size: 0.875rem;"></textarea>
+                            </div>
+                            <span asp-validation-for="Content" class="text-danger"></span>
+                        </div>
+
+                        <style>
+                            .summernote-wrapper .note-editor.note-frame {
+                                border: 1px solid #ddd;
+                                background-color: #f8f9fa;
+                                padding: 20px;
+                            }
+                            .summernote-wrapper .note-editable {
+                                background-color: #fff !important;
+                                width: 210mm !important;
+                                min-height: 297mm !important;
+                                padding: 20mm !important;
+                                margin: 0 auto !important;
+                                box-shadow: 0 0 10px rgba(0,0,0,0.1) !important;
+                                box-sizing: border-box !important;
+                                border: 1px solid #eee !important;
+                            }
+                            .page-break {
+                                height: 0;
+                                border-top: 2px dashed #007bff;
+                                margin: 20px 0;
+                                position: relative;
+                                clear: both;
+                            }
+                            .page-break::after {
+                                content: "PAGE BREAK";
+                                position: absolute;
+                                top: -10px;
+                                left: 50%;
+                                transform: translateX(-50%);
+                                background: #fff;
+                                padding: 0 10px;
+                                font-size: 10px;
+                                color: #007bff;
+                                font-weight: bold;
+                            }
+                        </style>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Create Template
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3">
+            <div class="card shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="bi bi-lightbulb"></i> Quick Tips</h6>
+                </div>
+                <div class="card-body">
+                    <h6>Common Placeholders:</h6>
+                    <ul class="list-unstyled small">
+                        <li><code>{{CANDIDATE_NAME}}</code></li>
+                        <li><code>{{CANDIDATE_EMAIL}}</code></li>
+                        <li><code>{{DESIGNATION}}</code></li>
+                        <li><code>{{DEPARTMENT}}</code></li>
+                        <li><code>{{JOINING_DATE}}</code></li>
+                        <li><code>{{CTC}}</code></li>
+                        <li><code>{{BASIC_SALARY}}</code></li>
+                        <li><code>{{COMPANY_NAME}}</code></li>
+                    </ul>
+                    <a asp-action="Placeholders" class="btn btn-sm btn-outline-primary w-100" target="_blank">
+                        View All Placeholders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var placeholderItems = [
+                '{{CANDIDATE_NAME}}', '{{CANDIDATE_EMAIL}}', '{{CANDIDATE_PHONE}}', 
+                '{{CANDIDATE_ADDRESS}}', '{{DESIGNATION}}', '{{DEPARTMENT}}', 
+                '{{JOINING_DATE}}', '{{LOCATION}}', '{{COMPANY_NAME}}',
+                '--- Annual Salary ---',
+                '{{BASIC_SALARY}}', '{{HRA}}', '{{CONVEYANCE_ALLOWANCE}}', '{{MEDICAL_ALLOWANCE}}', 
+                '{{SPECIAL_ALLOWANCE}}', '{{OTHER_ALLOWANCES}}', '{{GROSS_SALARY}}', 
+                '{{PF}}', '{{ESI}}', '{{PROFESSIONAL_TAX}}', '{{TDS}}', 
+                '{{OTHER_DEDUCTIONS}}', '{{TOTAL_DEDUCTIONS}}', '{{NET_SALARY}}', '{{CTC}}',
+                '--- Monthly Salary ---',
+                '{{BASIC_SALARY_MONTHLY}}', '{{HRA_MONTHLY}}', '{{CONVEYANCE_MONTHLY}}', 
+                '{{MEDICAL_MONTHLY}}', '{{SPECIAL_MONTHLY}}', '{{OTHER_ALLOWANCES_MONTHLY}}', 
+                '{{GROSS_SALARY_MONTHLY}}', '{{PF_MONTHLY}}', '{{ESI_MONTHLY}}', 
+                '{{PROFESSIONAL_TAX_MONTHLY}}', '{{TDS_MONTHLY}}', '{{OTHER_DEDUCTIONS_MONTHLY}}', 
+                '{{TOTAL_DEDUCTIONS_MONTHLY}}', '{{NET_SALARY_MONTHLY}}', '{{CTC_MONTHLY}}',
+                '--- Dynamic ---',
+                '{{TODAY_DATE}}', '{{TODAY_TIME}}', '{{CURRENT_YEAR}}'
+            ];
+
+            // Define custom button
+            var PlaceholderButton = function (context) {
+                var ui = $.summernote.ui;
+                var button = ui.buttonGroup([
+                    ui.button({
+                        className: 'dropdown-toggle',
+                        contents: '<i class="bi bi-braces"></i> Placeholders <span class="caret"></span>',
+                        data: {
+                            toggle: 'dropdown'
+                        }
+                    }),
+                    ui.dropdown({
+                        className: 'dropdown-menu',
+                        contents: function() {
+                            var list = '';
+                            placeholderItems.forEach(function(item) {
+                                list += '<li><a class="dropdown-item" href="#" data-value="' + item + '">' + item + '</a></li>';
+                            });
+                            return list;
+                        },
+                        callback: function($dropdown) {
+                            $dropdown.find('.dropdown-item').click(function(e) {
+                                e.preventDefault();
+                                context.invoke('editor.insertText', $(this).data('value'));
+                            });
+                        }
+                    })
+                ]);
+                return button.render();   
+            }
+
+            // Page Break Button
+            var PageBreakButton = function (context) {
+                var ui = $.summernote.ui;
+                var button = ui.button({
+                    contents: '<i class="bi bi-file-earmark-break"></i> Page Break',
+                    tooltip: 'Insert Page Break',
+                    click: function () {
+                        context.invoke('editor.pasteHTML', '<div class="page-break"></div><p><br></p>');
+                    }
+                });
+                return button.render();
+            }
+
+            $('#Content').summernote({
+                placeholder: 'Write your offer letter template here...',
+                tabsize: 2,
+                height: 800,
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'underline', 'clear']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link', 'picture', 'video', 'pagebreak']],
+                    ['view', ['fullscreen', 'codeview', 'help']],
+                    ['custom', ['placeholders']]
+                ],
+                buttons: {
+                    placeholders: PlaceholderButton,
+                    pagebreak: PageBreakButton
+                }
+            });
+        });
+    </script>
+}

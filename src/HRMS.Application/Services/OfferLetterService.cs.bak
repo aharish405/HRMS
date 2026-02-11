@@ -1,0 +1,779 @@
+using AutoMapper;
+using HRMS.Application.DTOs.Employee;
+using HRMS.Application.DTOs.OfferLetter;
+using HRMS.Application.Interfaces;
+using HRMS.Domain.Entities;
+using HRMS.Domain.Enums;
+using HRMS.Domain.Interfaces;
+using HRMS.Shared.Models;
+using iText.Kernel.Colors;
+using iText.Kernel.Pdf;
+using iText.Layout;
+using iText.Layout.Element;
+using iText.Layout.Properties;
+using Microsoft.Extensions.Logging;
+
+namespace HRMS.Application.Services;
+
+public class OfferLetterService : IOfferLetterService
+{
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+    private readonly ILogger<OfferLetterService> _logger;
+
+    public OfferLetterService(
+        IUnitOfWork unitOfWork,
+        IMapper mapper,
+        ILogger<OfferLetterService> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _mapper = mapper;
+        _logger = logger;
+    }
+
+    public async Task<Result<IEnumerable<OfferLetterDto>>> GetAllOfferLettersAsync()
+    {
+        try
+        {
+            var offerLetterRepo = _unitOfWork.Repository<OfferLetter>();
+            var offerLetters = await offerLetterRepo.GetAllAsync();
+
+            var offerLettersList = offerLetters.OrderByDescending(o => o.GeneratedOn).ToList();
+            foreach (var offerLetter in offerLettersList)
+            {
+                await LoadNavigationPropertiesAsync(offerLetter);
+            }
+
+            var offerLetterDtos = _mapper.Map<IEnumerable<OfferLetterDto>>(offerLettersList);
+            return Result<IEnumerable<OfferLetterDto>>.SuccessResult(offerLetterDtos);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all offer letters");
+            return Result<IEnumerable<OfferLetterDto>>.FailureResult("Error retrieving offer letters");
+        }
+    }
+
+    public async Task<Result<OfferLetterDto>> GetOfferLetterByIdAsync(int id)
+    {
+        try
+        {
+            var offerLetterRepo = _unitOfWork.Repository<OfferLetter>();
+            var offerLetter = await offerLetterRepo.GetByIdAsync(id);
+
+            if (offerLetter == null)
+            {
+                return Result<OfferLetterDto>.FailureResult("Offer letter not found");
+            }
+
+            await LoadNavigationPropertiesAsync(offerLetter);
+
+            var offerLetterDto = _mapper.Map<OfferLetterDto>(offerLetter);
+            return Result<OfferLetterDto>.SuccessResult(offerLetterDto);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting offer letter {OfferLetterId}", id);
+            return Result<OfferLetterDto>.FailureResult("Error retrieving offer letter");
+        }
+    }
+
+    public async Task<Result<OfferLetterDto>> CreateOfferLetterAsync(CreateOfferLetterDto dto, string createdBy)
+    {
+        try
+        {
+            // Link to Employee if provided
+            if (dto.EmployeeId.HasValue)
+            {
+                var employeeRepo = _unitOfWork.Repository<Employee>();
+                var employee = await employeeRepo.GetByIdAsync(dto.EmployeeId.Value);
+                
+                if (employee == null)
+                    return Result<OfferLetterDto>.FailureResult("Selected employee not found");
+
+                if (employee.Status != EmployeeStatus.Draft)
+                    return Result<OfferLetterDto>.FailureResult("Selected employee must be in Draft status");
+
+                // Validate that the name matches (optional, but good for consistency)
+                // For now, we trust the DTO but ensure linking
+            }
+
+            var offerLetter = new OfferLetter
+            {
+                CandidateName = dto.CandidateName,
+                CandidateEmail = dto.CandidateEmail,
+                CandidatePhone = dto.CandidatePhone,
+                CandidateAddress = dto.CandidateAddress,
+                DepartmentId = dto.DepartmentId,
+                DesignationId = dto.DesignationId,
+                BasicSalary = dto.BasicSalary,
+                HRA = dto.HRA,
+                ConveyanceAllowance = dto.ConveyanceAllowance,
+                MedicalAllowance = dto.MedicalAllowance,
+                SpecialAllowance = dto.SpecialAllowance,
+                OtherAllowances = dto.OtherAllowances,
+                PF = dto.PF,
+                ESI = dto.ESI,
+                ProfessionalTax = dto.ProfessionalTax,
+                TDS = dto.TDS,
+                OtherDeductions = dto.OtherDeductions,
+                JoiningDate = dto.JoiningDate,
+                Location = dto.Location,
+                AdditionalTerms = dto.AdditionalTerms,
+                Status = OfferLetterStatus.Draft,
+                GeneratedOn = DateTime.UtcNow,
+                GeneratedBy = createdBy,
+                CreatedBy = createdBy,
+                CreatedOn = DateTime.UtcNow,
+                // New Fields (WP3)
+                EmployeeId = dto.EmployeeId, // Link to draft employee (will be used for acceptance later)
+                TemplateId = dto.TemplateId
+            };
+
+            // Generate Content from Template if provided
+            if (dto.TemplateId.HasValue)
+            {
+                var template = await _unitOfWork.Repository<OfferLetterTemplate>().GetByIdAsync(dto.TemplateId.Value);
+                if (template != null)
+                {
+                    // Calculate CTC (reused logic)
+                    var ctc = dto.BasicSalary + dto.HRA + dto.ConveyanceAllowance + dto.MedicalAllowance + dto.SpecialAllowance + dto.OtherAllowances;
+                    var gross = ctc; // Assuming no deductions from CTC for Gross calculation as per existing logic
+                    
+                    // Fetch Department/Designation names
+                    var dept = await _unitOfWork.Repository<Department>().GetByIdAsync(dto.DepartmentId);
+                    var desig = await _unitOfWork.Repository<Designation>().GetByIdAsync(dto.DesignationId);
+
+                    var placeholderValues = new Dictionary<string, string>
+                    {
+                        { "CANDIDATE_NAME", dto.CandidateName },
+                        { "CANDIDATE_EMAIL", dto.CandidateEmail },
+                        { "CANDIDATE_PHONE", dto.CandidatePhone },
+                        { "CANDIDATE_ADDRESS", dto.CandidateAddress },
+                        { "DESIGNATION", desig?.Title ?? "" },
+                        { "DEPARTMENT", dept?.Name ?? "" },
+                        { "JOINING_DATE", dto.JoiningDate.ToString("dd MMMM yyyy") },
+                        { "LOCATION", dto.Location },
+                        { "BASIC_SALARY", dto.BasicSalary.ToString("N2") },
+                        { "HRA", dto.HRA.ToString("N2") },
+                        { "CTC", ctc.ToString("N2") },
+                        { "COMPANY_NAME", "WorkAxis HRMS" } // Hardcoded for now or fetch from config
+                    };
+
+                    var renderedContent = template.Content;
+                    foreach (var placeholder in placeholderValues)
+                    {
+                        var placeholderKey = $"{{{{{placeholder.Key}}}}}";
+                        renderedContent = renderedContent.Replace(placeholderKey, placeholder.Value ?? string.Empty);
+                    }
+                    offerLetter.GeneratedContent = renderedContent;
+                }
+            }
+
+            // Calculate totals
+            CalculateOfferTotals(offerLetter);
+
+            var offerLetterRepo = _unitOfWork.Repository<OfferLetter>();
+            await offerLetterRepo.AddAsync(offerLetter);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Offer letter created for {CandidateName} by {CreatedBy}",
+                dto.CandidateName, createdBy);
+
+            await LoadNavigationPropertiesAsync(offerLetter);
+            var offerLetterDto = _mapper.Map<OfferLetterDto>(offerLetter);
+
+            return Result<OfferLetterDto>.SuccessResult(offerLetterDto, "Offer letter created successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating offer letter");
+            return Result<OfferLetterDto>.FailureResult("Error creating offer letter");
+        }
+    }
+
+    public async Task<Result<OfferLetterDto>> UpdateOfferLetterStatusAsync(int id, OfferLetterStatus status, string updatedBy)
+    {
+        try
+        {
+            var offerLetterRepo = _unitOfWork.Repository<OfferLetter>();
+            var offerLetter = await offerLetterRepo.GetByIdAsync(id);
+
+            if (offerLetter == null)
+            {
+                return Result<OfferLetterDto>.FailureResult("Offer letter not found");
+            }
+
+            offerLetter.Status = status;
+            offerLetter.ModifiedBy = updatedBy;
+            offerLetter.ModifiedOn = DateTime.UtcNow;
+
+            offerLetterRepo.Update(offerLetter);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Offer letter {OfferLetterId} status updated to {Status} by {UpdatedBy}",
+                id, status, updatedBy);
+
+            await LoadNavigationPropertiesAsync(offerLetter);
+            var offerLetterDto = _mapper.Map<OfferLetterDto>(offerLetter);
+
+            return Result<OfferLetterDto>.SuccessResult(offerLetterDto, "Status updated successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating offer letter status {OfferLetterId}", id);
+            return Result<OfferLetterDto>.FailureResult("Error updating status");
+        }
+    }
+
+    public async Task<Result> DeleteOfferLetterAsync(int id)
+    {
+        try
+        {
+            var offerLetterRepo = _unitOfWork.Repository<OfferLetter>();
+            var offerLetter = await offerLetterRepo.GetByIdAsync(id);
+
+            if (offerLetter == null)
+            {
+                return Result.FailureResult("Offer letter not found");
+            }
+
+            offerLetterRepo.Remove(offerLetter);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Offer letter {OfferLetterId} deleted", id);
+
+            return Result.SuccessResult("Offer letter deleted successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting offer letter {OfferLetterId}", id);
+            return Result.FailureResult("Error deleting offer letter");
+        }
+    }
+
+    public async Task<Result<byte[]>> GenerateOfferLetterPdfAsync(int id)
+    {
+        try
+        {
+            var offerLetterRepo = _unitOfWork.Repository<OfferLetter>();
+            var offerLetter = await offerLetterRepo.GetByIdAsync(id);
+
+            if (offerLetter == null)
+            {
+                return Result<byte[]>.FailureResult("Offer letter not found");
+            }
+
+            await LoadNavigationPropertiesAsync(offerLetter);
+
+            using var memoryStream = new MemoryStream();
+            using var writer = new PdfWriter(memoryStream);
+            using var pdf = new PdfDocument(writer);
+            using var document = new Document(pdf);
+
+            // Company Header
+            var header = new Paragraph("WorkAxis HRMS")
+                .SetTextAlignment(TextAlignment.CENTER)
+                .SetFontSize(22)
+                .SetBold();
+            document.Add(header);
+
+            var companyAddress = new Paragraph("123 Business Park, Tech City, TC 12345\nEmail: hr@workaxis.com | Phone: +1-234-567-8900")
+                .SetTextAlignment(TextAlignment.CENTER)
+                .SetFontSize(10);
+            document.Add(companyAddress);
+
+            document.Add(new Paragraph("\n"));
+
+            // Date
+            var date = new Paragraph($"Date: {offerLetter.GeneratedOn:dd MMMM yyyy}")
+                .SetFontSize(11);
+            document.Add(date);
+
+            document.Add(new Paragraph("\n"));
+
+            // Candidate Address
+            var candidateAddress = new Paragraph($"{offerLetter.CandidateName}\n{offerLetter.CandidateAddress}")
+                .SetFontSize(11);
+            document.Add(candidateAddress);
+
+            document.Add(new Paragraph("\n"));
+
+            // Subject
+            var subject = new Paragraph($"Subject: Offer of Employment - {offerLetter.Designation.Title}")
+                .SetFontSize(12)
+                .SetBold();
+            document.Add(subject);
+
+            document.Add(new Paragraph("\n"));
+
+            // Salutation
+            var salutation = new Paragraph($"Dear {offerLetter.CandidateName},")
+                .SetFontSize(11);
+            document.Add(salutation);
+
+            document.Add(new Paragraph("\n"));
+
+            // Body
+            var body1 = new Paragraph($"We are pleased to offer you the position of {offerLetter.Designation.Title} in the {offerLetter.Department.Name} department at WorkAxis HRMS. We believe that your skills and experience will be a valuable asset to our team.")
+                .SetFontSize(11);
+            document.Add(body1);
+
+            document.Add(new Paragraph("\n"));
+
+            // Position Details
+            var positionHeader = new Paragraph("Position Details:")
+                .SetFontSize(12)
+                .SetBold();
+            document.Add(positionHeader);
+
+            var positionTable = new Table(2);
+            positionTable.SetWidth(UnitValue.CreatePercentValue(100));
+
+            AddDetailRow(positionTable, "Position:", offerLetter.Designation.Title);
+            AddDetailRow(positionTable, "Department:", offerLetter.Department.Name);
+            AddDetailRow(positionTable, "Location:", offerLetter.Location);
+            AddDetailRow(positionTable, "Joining Date:", offerLetter.JoiningDate.ToString("dd MMMM yyyy"));
+
+            document.Add(positionTable);
+            document.Add(new Paragraph("\n"));
+
+            // Compensation
+            var compensationHeader = new Paragraph("Compensation Details:")
+                .SetFontSize(12)
+                .SetBold();
+            document.Add(compensationHeader);
+
+            var salaryTable = new Table(new float[] { 3, 2 });
+            salaryTable.SetWidth(UnitValue.CreatePercentValue(100));
+
+            AddSalaryHeaderRow(salaryTable, "Component", "Amount (₹)");
+            AddSalaryRow(salaryTable, "Basic Salary", offerLetter.BasicSalary);
+            AddSalaryRow(salaryTable, "House Rent Allowance (HRA)", offerLetter.HRA);
+            AddSalaryRow(salaryTable, "Conveyance Allowance", offerLetter.ConveyanceAllowance);
+            AddSalaryRow(salaryTable, "Medical Allowance", offerLetter.MedicalAllowance);
+            AddSalaryRow(salaryTable, "Special Allowance", offerLetter.SpecialAllowance);
+            if (offerLetter.OtherAllowances > 0)
+            {
+                AddSalaryRow(salaryTable, "Other Allowances", offerLetter.OtherAllowances);
+            }
+            AddSalaryTotalRow(salaryTable, "Total Annual CTC", offerLetter.CTC);
+
+            document.Add(salaryTable);
+            document.Add(new Paragraph("\n"));
+
+            // Terms and Conditions
+            var termsHeader = new Paragraph("Terms and Conditions:")
+                .SetFontSize(12)
+                .SetBold();
+            document.Add(termsHeader);
+
+            var terms = new List()
+                .SetSymbolIndent(12)
+                .SetListSymbol("\u2022");
+
+            terms.Add(new ListItem("This offer is contingent upon successful completion of background verification."));
+            terms.Add(new ListItem("You will be required to serve a probation period of 3 months."));
+            terms.Add(new ListItem("Your employment will be governed by the company's policies and procedures."));
+            terms.Add(new ListItem("Either party may terminate the employment with 30 days' notice."));
+
+            if (!string.IsNullOrWhiteSpace(offerLetter.AdditionalTerms))
+            {
+                terms.Add(new ListItem(offerLetter.AdditionalTerms));
+            }
+
+            document.Add(terms);
+            document.Add(new Paragraph("\n"));
+
+            // Acceptance Instructions
+            var acceptance = new Paragraph("Please sign and return a copy of this letter to indicate your acceptance of this offer by " +
+                $"{offerLetter.JoiningDate.AddDays(-7):dd MMMM yyyy}.")
+                .SetFontSize(11);
+            document.Add(acceptance);
+
+            document.Add(new Paragraph("\n"));
+
+            // Closing
+            var closing = new Paragraph("We look forward to welcoming you to our team!")
+                .SetFontSize(11);
+            document.Add(closing);
+
+            document.Add(new Paragraph("\n\n"));
+
+            var signature = new Paragraph("Sincerely,\n\nHR Department\nWorkAxis HRMS")
+                .SetFontSize(11);
+            document.Add(signature);
+
+            document.Add(new Paragraph("\n\n"));
+
+            // Acceptance Section
+            var acceptanceSection = new Paragraph("Acceptance:")
+                .SetFontSize(12)
+                .SetBold();
+            document.Add(acceptanceSection);
+
+            var acceptanceText = new Paragraph($"I, {offerLetter.CandidateName}, accept the above offer of employment.\n\n" +
+                "Signature: _____________________     Date: _____________________")
+                .SetFontSize(11);
+            document.Add(acceptanceText);
+
+            document.Close();
+
+            _logger.LogInformation("Generated offer letter PDF for {OfferLetterId}", id);
+
+            return Result<byte[]>.SuccessResult(memoryStream.ToArray());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating offer letter PDF for {OfferLetterId}", id);
+            return Result<byte[]>.FailureResult("Error generating PDF");
+        }
+    }
+
+    private async Task LoadNavigationPropertiesAsync(OfferLetter offerLetter)
+    {
+        var departmentRepo = _unitOfWork.Repository<Department>();
+        var designationRepo = _unitOfWork.Repository<Designation>();
+
+        offerLetter.Department = (await departmentRepo.GetByIdAsync(offerLetter.DepartmentId))!;
+        offerLetter.Designation = (await designationRepo.GetByIdAsync(offerLetter.DesignationId))!;
+    }
+
+    // PDF Helper Methods
+    private static void AddDetailRow(Table table, string label, string value)
+    {
+        table.AddCell(new Cell().Add(new Paragraph(label)).SetBold());
+        table.AddCell(new Cell().Add(new Paragraph(value)));
+    }
+
+    private static void AddSalaryHeaderRow(Table table, string col1, string col2)
+    {
+        table.AddCell(new Cell().Add(new Paragraph(col1))
+            .SetBackgroundColor(ColorConstants.LIGHT_GRAY)
+            .SetBold()
+            .SetTextAlignment(TextAlignment.LEFT));
+        table.AddCell(new Cell().Add(new Paragraph(col2))
+            .SetBackgroundColor(ColorConstants.LIGHT_GRAY)
+            .SetBold()
+            .SetTextAlignment(TextAlignment.RIGHT));
+    }
+
+    private static void AddSalaryRow(Table table, string component, decimal amount)
+    {
+        table.AddCell(new Cell().Add(new Paragraph(component)));
+        table.AddCell(new Cell().Add(new Paragraph(amount.ToString("N2")))
+            .SetTextAlignment(TextAlignment.RIGHT));
+    }
+
+    private static void AddSalaryTotalRow(Table table, string label, decimal amount)
+    {
+        table.AddCell(new Cell().Add(new Paragraph(label))
+            .SetBold()
+            .SetBackgroundColor(ColorConstants.LIGHT_GRAY));
+        table.AddCell(new Cell().Add(new Paragraph(amount.ToString("N2")))
+            .SetBold()
+            .SetBackgroundColor(ColorConstants.LIGHT_GRAY)
+            .SetTextAlignment(TextAlignment.RIGHT));
+    }
+
+    public async Task<Result<IEnumerable<OfferLetterDto>>> BulkGenerateOfferLettersAsync(BulkOfferGenerationDto dto, string createdBy)
+    {
+        try
+        {
+            var generatedOffers = new List<OfferLetterDto>();
+            var errors = new List<string>();
+
+            foreach (var employeeData in dto.Employees)
+            {
+                try
+                {
+                    // Calculate CTC
+                    var ctc = employeeData.BasicSalary + employeeData.HRA + employeeData.ConveyanceAllowance +
+                             employeeData.MedicalAllowance + employeeData.SpecialAllowance + employeeData.OtherAllowances;
+                    var offerLetter = new OfferLetter
+                    {
+                        CandidateName = employeeData.CandidateName,
+                        CandidateEmail = employeeData.CandidateEmail,
+                        CandidatePhone = employeeData.CandidatePhone ?? "",
+                        CandidateAddress = employeeData.CandidateAddress ?? "",
+                        DepartmentId = employeeData.DepartmentId,
+                        DesignationId = employeeData.DesignationId,
+                        BasicSalary = employeeData.BasicSalary,
+                        HRA = employeeData.HRA,
+                        ConveyanceAllowance = employeeData.ConveyanceAllowance,
+                        MedicalAllowance = employeeData.MedicalAllowance,
+                        SpecialAllowance = employeeData.SpecialAllowance,
+                        OtherAllowances = employeeData.OtherAllowances,
+                        PF = employeeData.PF,
+                        ESI = employeeData.ESI,
+                        ProfessionalTax = employeeData.ProfessionalTax,
+                        TDS = employeeData.TDS,
+                        OtherDeductions = employeeData.OtherDeductions,
+                        JoiningDate = employeeData.JoiningDate,
+                        Location = employeeData.Location,
+                        AdditionalTerms = employeeData.AdditionalTerms,
+                        Status = OfferLetterStatus.Draft,
+                        GeneratedOn = DateTime.UtcNow,
+                        GeneratedBy = createdBy,
+                        CreatedBy = createdBy,
+                        CreatedOn = DateTime.UtcNow,
+                        TemplateId = dto.TemplateId
+                    };
+
+                    // Calculate totals
+                    CalculateOfferTotals(offerLetter);
+
+                    // Load navigation properties to get department and designation names
+                    var department = await _unitOfWork.Repository<Department>().GetByIdAsync(employeeData.DepartmentId);
+                    var designation = await _unitOfWork.Repository<Designation>().GetByIdAsync(employeeData.DesignationId);
+
+                    // Generate content from template
+                    var placeholderValues = new Dictionary<string, string>
+                    {
+                        { "CANDIDATE_NAME", employeeData.CandidateName },
+                        { "CANDIDATE_EMAIL", employeeData.CandidateEmail },
+                        { "CANDIDATE_PHONE", employeeData.CandidatePhone ?? "" },
+                        { "CANDIDATE_ADDRESS", employeeData.CandidateAddress ?? "" },
+                        { "COMPANY_NAME", dto.CompanyName },
+                        { "COMPANY_ADDRESS", dto.CompanyAddress },
+                        { "OFFER_DATE", DateTime.Now.ToString("dd MMMM yyyy") },
+                        { "DESIGNATION", designation?.Title ?? "" },
+                        { "DEPARTMENT", department?.Name ?? "" },
+                        { "JOINING_DATE", employeeData.JoiningDate.ToString("dd MMMM yyyy") },
+                        { "LOCATION", employeeData.Location },
+                        { "BASIC_SALARY", employeeData.BasicSalary.ToString("N2") },
+                        { "HRA", employeeData.HRA.ToString("N2") },
+                        { "CONVEYANCE_ALLOWANCE", employeeData.ConveyanceAllowance.ToString("N2") },
+                        { "MEDICAL_ALLOWANCE", employeeData.MedicalAllowance.ToString("N2") },
+                        { "SPECIAL_ALLOWANCE", employeeData.SpecialAllowance.ToString("N2") },
+                        { "OTHER_ALLOWANCES", employeeData.OtherAllowances.ToString("N2") },
+                        { "CTC", ctc.ToString("N2") },
+                        { "GROSS_SALARY", (ctc / 12).ToString("N2") }
+                    };
+
+                    // Get template and render content
+                    var template = await _unitOfWork.Repository<OfferLetterTemplate>().GetByIdAsync(dto.TemplateId);
+                    if (template != null)
+                    {
+                        var renderedContent = template.Content;
+                        foreach (var placeholder in placeholderValues)
+                        {
+                            var placeholderKey = $"{{{{{placeholder.Key}}}}}";
+                            renderedContent = renderedContent.Replace(placeholderKey, placeholder.Value ?? string.Empty);
+                        }
+                        offerLetter.GeneratedContent = renderedContent;
+                    }
+
+                    await _unitOfWork.Repository<OfferLetter>().AddAsync(offerLetter);
+                    await _unitOfWork.SaveChangesAsync();
+
+                    await LoadNavigationPropertiesAsync(offerLetter);
+                    var offerLetterDto = _mapper.Map<OfferLetterDto>(offerLetter);
+                    generatedOffers.Add(offerLetterDto);
+
+                    _logger.LogInformation("Generated offer letter for {CandidateName} by {User}", employeeData.CandidateName, createdBy);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error generating offer letter for {CandidateName}", employeeData.CandidateName);
+                    errors.Add($"Failed to generate offer for {employeeData.CandidateName}: {ex.Message}");
+                }
+            }
+
+            if (generatedOffers.Count == 0)
+            {
+                return Result<IEnumerable<OfferLetterDto>>.FailureResult("Failed to generate any offer letters. " + string.Join("; ", errors));
+            }
+
+            var message = generatedOffers.Count == dto.Employees.Count
+                ? $"Successfully generated {generatedOffers.Count} offer letters"
+                : $"Generated {generatedOffers.Count} out of {dto.Employees.Count} offer letters. Errors: {string.Join("; ", errors)}";
+
+            return Result<IEnumerable<OfferLetterDto>>.SuccessResult(generatedOffers, message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in bulk offer letter generation");
+            return Result<IEnumerable<OfferLetterDto>>.FailureResult("Error generating offer letters");
+        }
+    }
+
+    public async Task<Result<EmployeeDto>> AcceptOfferAndCreateEmployeeAsync(int offerLetterId, string acceptedBy)
+    {
+        _logger.LogInformation("Starting offer acceptance process for offer {OfferId} by {User}", offerLetterId, acceptedBy);
+
+        try
+        {
+            // 1. Get and validate offer letter
+            var offerRepo = _unitOfWork.Repository<OfferLetter>();
+            var offer = await offerRepo.GetByIdAsync(offerLetterId);
+
+            if (offer == null)
+            {
+                _logger.LogWarning("Offer letter {OfferId} not found", offerLetterId);
+                return Result<EmployeeDto>.FailureResult("Offer letter not found");
+            }
+
+            _logger.LogInformation("Found offer letter {OfferId} with status {Status}", offerLetterId, offer.Status);
+
+            if (offer.Status != OfferLetterStatus.Sent)
+            {
+                _logger.LogWarning("Offer {OfferId} has invalid status {Status} for acceptance", offerLetterId, offer.Status);
+                return Result<EmployeeDto>.FailureResult($"Only sent offers can be accepted. Current status: {offer.Status}");
+            }
+
+            if (offer.EmployeeId != null)
+            {
+                _logger.LogWarning("Offer {OfferId} already accepted with employee {EmployeeId}", offerLetterId, offer.EmployeeId);
+                return Result<EmployeeDto>.FailureResult("This offer has already been accepted");
+            }
+
+            // 2. Parse candidate name into first and last name
+            var nameParts = offer.CandidateName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var firstName = nameParts.Length > 0 ? nameParts[0] : offer.CandidateName;
+            var lastName = nameParts.Length > 1 ? string.Join(" ", nameParts.Skip(1)) : "";
+
+            _logger.LogInformation("Parsed name: FirstName={FirstName}, LastName={LastName}", firstName, lastName);
+
+            // 3. Generate unique employee code
+            var employeeRepo = _unitOfWork.Repository<Employee>();
+            var existingEmployees = await employeeRepo.GetAllAsync();
+            var maxCode = existingEmployees
+                .Select(e => e.EmployeeCode)
+                .Where(code => code.StartsWith("EMP"))
+                .Select(code => int.TryParse(code.Substring(3), out var num) ? num : 0)
+                .DefaultIfEmpty(0)
+                .Max();
+            var employeeCode = $"EMP{(maxCode + 1):D4}";
+
+            _logger.LogInformation("Generated employee code: {EmployeeCode}", employeeCode);
+
+            // 4. Check if email is unique
+            var emailExists = existingEmployees.Any(e => e.Email == offer.CandidateEmail);
+            if (emailExists)
+            {
+                _logger.LogWarning("Email {Email} already exists in system", offer.CandidateEmail);
+                return Result<EmployeeDto>.FailureResult($"Email {offer.CandidateEmail} is already registered");
+            }
+
+            // 5. Create employee record
+            _logger.LogInformation("Creating employee record for {EmployeeCode}", employeeCode);
+
+            var employee = new Employee
+            {
+                EmployeeCode = employeeCode,
+                FirstName = firstName,
+                LastName = lastName,
+                Email = offer.CandidateEmail,
+                Phone = offer.CandidatePhone,
+                Address = offer.CandidateAddress,
+                DepartmentId = offer.DepartmentId,
+                DesignationId = offer.DesignationId,
+                JoiningDate = offer.JoiningDate,
+                DateOfBirth = DateTime.UtcNow.AddYears(-25), // Default, should be updated later
+                Gender = Gender.Other, // Default, should be updated later
+                Status = EmployeeStatus.Active,
+                CreatedBy = acceptedBy,
+                CreatedOn = DateTime.UtcNow
+            };
+
+            await employeeRepo.AddAsync(employee);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Employee {EmployeeCode} (ID: {EmployeeId}) created successfully from offer {OfferId}",
+                employee.EmployeeCode, employee.Id, offerLetterId);
+
+            // 6. Create salary structure from offer
+            _logger.LogInformation("Creating salary structure for employee {EmployeeCode}", employee.EmployeeCode);
+
+            var salaryRepo = _unitOfWork.Repository<Salary>();
+            var salary = new Salary
+            {
+                EmployeeId = employee.Id,
+                BasicSalary = offer.BasicSalary,
+                HRA = offer.HRA,
+                ConveyanceAllowance = offer.ConveyanceAllowance,
+                MedicalAllowance = offer.MedicalAllowance,
+                SpecialAllowance = offer.SpecialAllowance,
+                OtherAllowances = offer.OtherAllowances,
+                // Use deductions from offer
+                PF = offer.PF,
+                ESI = offer.ESI,
+                ProfessionalTax = offer.ProfessionalTax,
+                TDS = offer.TDS,
+                OtherDeductions = offer.OtherDeductions,
+                // Use computed values from offer
+                GrossSalary = offer.GrossSalary,
+                TotalDeductions = offer.TotalDeductions,
+                NetSalary = offer.NetSalary,
+                CTC = offer.CTC,
+                EffectiveFrom = offer.JoiningDate,
+                IsActive = true,
+                // ENTERPRISE FLOW: Link to source offer and mark as system-generated
+                OfferLetterId = offer.Id,
+                IsSystemGenerated = true,
+                CreatedBy = acceptedBy,
+                CreatedOn = DateTime.UtcNow
+            };
+
+            await salaryRepo.AddAsync(salary);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Salary structure (ID: {SalaryId}) created for employee {EmployeeCode} with CTC: {CTC}",
+                salary.Id, employee.EmployeeCode, salary.CTC);
+
+            // 7. Update offer letter
+            _logger.LogInformation("Updating offer letter {OfferId} status to Accepted", offerLetterId);
+
+            offer.Status = OfferLetterStatus.Accepted;
+            offer.EmployeeId = employee.Id;
+            offer.AcceptedOn = DateTime.UtcNow; // ENTERPRISE FLOW: Track acceptance timestamp
+            offer.ModifiedBy = acceptedBy;
+            offer.ModifiedOn = DateTime.UtcNow;
+
+            offerRepo.Update(offer);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Offer letter {OfferId} successfully accepted and linked to employee {EmployeeCode} (ID: {EmployeeId})",
+                offerLetterId, employee.EmployeeCode, employee.Id);
+
+            // 8. Load navigation properties and return employee DTO
+            await LoadEmployeeNavigationProperties(employee);
+            var employeeDto = _mapper.Map<EmployeeDto>(employee);
+
+            return Result<EmployeeDto>.SuccessResult(employeeDto,
+                $"Offer accepted successfully! Employee {employee.EmployeeCode} created with salary structure.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error accepting offer letter {OfferId}: {ErrorMessage}", offerLetterId, ex.Message);
+            return Result<EmployeeDto>.FailureResult($"Error accepting offer: {ex.Message}. Please check logs for details.");
+        }
+    }
+
+    private void CalculateOfferTotals(OfferLetter offer)
+    {
+        // Calculate Gross Salary (all allowances)
+        offer.GrossSalary = offer.BasicSalary + offer.HRA + offer.ConveyanceAllowance +
+                           offer.MedicalAllowance + offer.SpecialAllowance + offer.OtherAllowances;
+
+        // Calculate Total Deductions
+        offer.TotalDeductions = offer.PF + offer.ESI + offer.ProfessionalTax +
+                               offer.TDS + offer.OtherDeductions;
+
+        // CTC = Gross Salary (no deductions in CTC calculation)
+        offer.CTC = offer.GrossSalary;
+
+        // Net Salary = Gross - Deductions
+        offer.NetSalary = offer.GrossSalary - offer.TotalDeductions;
+    }
+
+    private async Task LoadEmployeeNavigationProperties(Employee employee)
+    {
+        var departmentRepo = _unitOfWork.Repository<Department>();
+        var designationRepo = _unitOfWork.Repository<Designation>();
+
+        employee.Department = await departmentRepo.GetByIdAsync(employee.DepartmentId) ?? new Department();
+        employee.Designation = await designationRepo.GetByIdAsync(employee.DesignationId) ?? new Designation();
+    }
+}

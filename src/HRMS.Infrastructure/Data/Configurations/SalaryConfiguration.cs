@@ -73,8 +73,14 @@ public class SalaryConfiguration : IEntityTypeConfiguration<Salary>
             .HasForeignKey(s => s.EmployeeId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasOne(s => s.OfferLetter)
+            .WithMany(o => o.Salaries)
+            .HasForeignKey(s => s.OfferLetterId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         // Indexes
         builder.HasIndex(s => s.EmployeeId);
+        builder.HasIndex(s => s.OfferLetterId);
         builder.HasIndex(s => s.EffectiveFrom);
         builder.HasIndex(s => new { s.EmployeeId, s.EffectiveFrom });
     }

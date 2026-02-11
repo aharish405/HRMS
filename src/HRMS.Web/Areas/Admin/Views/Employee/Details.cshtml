@@ -5,7 +5,31 @@
 
 <div class="row mb-3">
     <div class="col-md-8">
-        <h2><i class="bi bi-person-badge"></i> Employee Details</h2>
+        <h2>
+            <i class="bi bi-person-badge"></i> Employee Details
+            @switch (Model.Status)
+            {
+                case 0: // Draft
+                    <span class="badge bg-warning text-dark ms-2">
+                        <i class="bi bi-pencil-square"></i> Draft
+                    </span>
+                    break;
+                case 1: // Active
+                    <span class="badge bg-success ms-2">
+                        <i class="bi bi-check-circle"></i> Active
+                    </span>
+                    break;
+                case 2: // OnNotice
+                    <span class="badge bg-info ms-2">On Notice</span>
+                    break;
+                case 3: // Relieved
+                    <span class="badge bg-secondary ms-2">Relieved</span>
+                    break;
+                case 4: // Terminated
+                    <span class="badge bg-danger ms-2">Terminated</span>
+                    break;
+            }
+        </h2>
     </div>
     <div class="col-md-4 text-end">
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
@@ -62,6 +86,33 @@
         </div>
 
         <div class="card mb-3">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-person-vcard"></i> KYC & Emergency Contact</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>PAN Number:</strong></div>
+                    <div class="col-md-8">@Model.PanNumber</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Aadhar Number:</strong></div>
+                    <div class="col-md-8">@Model.AadharNumber</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Blood Group:</strong></div>
+                    <div class="col-md-8">@Model.BloodGroup</div>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.EmergencyContactName))
+                {
+                    <div class="row mb-2">
+                        <div class="col-md-4"><strong>Emergency Contact:</strong></div>
+                        <div class="col-md-8">@Model.EmergencyContactName (@Model.EmergencyContactPhone)</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card mb-3">
             <div class="card-header bg-success text-white">
                 <h5 class="mb-0"><i class="bi bi-briefcase"></i> Employment Details</h5>
             </div>
@@ -95,17 +146,23 @@
                 <div class="row mb-2">
                     <div class="col-md-4"><strong>Status:</strong></div>
                     <div class="col-md-8">
-                        @if (Model.Status == "Active")
+                        @switch (Model.Status)
                         {
-                            <span class="badge bg-success">@Model.Status</span>
-                        }
-                        else if (Model.Status == "OnNotice")
-                        {
-                            <span class="badge bg-warning">On Notice</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-secondary">@Model.Status</span>
+                            case 0: // Draft
+                                <span class="badge bg-warning text-dark">Draft</span>
+                                break;
+                            case 1: // Active
+                                <span class="badge bg-success">Active</span>
+                                break;
+                            case 2: // OnNotice
+                                <span class="badge bg-info">On Notice</span>
+                                break;
+                            case 3: // Relieved
+                                <span class="badge bg-secondary">Relieved</span>
+                                break;
+                            case 4: // Terminated
+                                <span class="badge bg-danger">Terminated</span>
+                                break;
                         }
                     </div>
                 </div>

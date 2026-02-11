@@ -1,0 +1,48 @@
+@model IEnumerable<HRMS.Application.DTOs.Leave.LeaveBalanceDto>
+@{
+    ViewData["Title"] = "Leave Balance";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Leave Balance</h1>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Balance for Year @ViewBag.Year</h6>
+    </div>
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Leave Type</th>
+                            <th>Total Allowed</th>
+                            <th>Used</th>
+                            <th>Remaining</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.LeaveTypeName</td>
+                                <td>@item.TotalDays</td>
+                                <td>@item.UsedDays</td>
+                                <td class="fw-bold text-primary">@item.AvailableDays</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <p class="text-muted">No leave balance records found.</p>
+            </div>
+        }
+    </div>
+</div>

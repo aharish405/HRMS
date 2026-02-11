@@ -1,0 +1,92 @@
+@model IEnumerable<HRMS.Application.DTOs.OfferLetterTemplate.TemplatePlaceholderDto>
+
+@{
+    ViewData["Title"] = "Template Placeholders";
+    var groupedPlaceholders = Model.GroupBy(p => p.Category).OrderBy(g => g.Key);
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="bi bi-tags"></i> Available Placeholders
+        </h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Templates
+        </a>
+    </div>
+
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Use these placeholders in your templates. They will be automatically replaced
+        with actual values when generating offer letters.
+    </div>
+
+    @foreach (var group in groupedPlaceholders)
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-folder"></i> @group.Key Placeholders
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 25%;">Placeholder</th>
+                                <th style="width: 20%;">Display Name</th>
+                                <th style="width: 15%;">Type</th>
+                                <th style="width: 25%;">Description</th>
+                                <th style="width: 15%;">Sample Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var placeholder in group.OrderBy(p => p.PlaceholderKey))
+                            {
+                                <tr>
+                                    <td>
+                                        <code class="text-primary">{{@placeholder.PlaceholderKey}}</code>
+                                        @if (placeholder.IsRequired)
+                                        {
+                                            <span class="badge bg-danger ms-1">Required</span>
+                                        }
+                                    </td>
+                                    <td>@placeholder.DisplayName</td>
+                                    <td>
+                                        <span class="badge bg-secondary">@placeholder.DataType</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@placeholder.Description</small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted font-monospace">@placeholder.SampleValue</small>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="card shadow-sm border-info">
+        <div class="card-header bg-info text-white">
+            <h6 class="mb-0"><i class="bi bi-lightbulb"></i> Usage Example</h6>
+        </div>
+        <div class="card-body">
+            <p class="mb-2"><strong>Template HTML:</strong></p>
+            <pre class="bg-light p-3 rounded"><code>&lt;p&gt;Dear {{CANDIDATE_NAME}},&lt;/p&gt;
+&lt;p&gt;We are pleased to offer you the position of {{DESIGNATION}} in the {{DEPARTMENT}} department.&lt;/p&gt;
+&lt;p&gt;Your annual CTC will be ₹{{CTC}}.&lt;/p&gt;</code></pre>
+
+            <p class="mb-2 mt-3"><strong>Generated Output:</strong></p>
+            <div class="bg-light p-3 rounded">
+                <p>Dear John Doe,</p>
+                <p>We are pleased to offer you the position of Senior Software Engineer in the Information Technology
+                    department.</p>
+                <p>Your annual CTC will be ₹12,00,000.</p>
+            </div>
+        </div>
+    </div>
+</div>

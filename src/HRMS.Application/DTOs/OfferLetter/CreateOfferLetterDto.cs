@@ -47,6 +47,14 @@ public class CreateOfferLetterDto
 
     [Range(0, double.MaxValue, ErrorMessage = "Other allowances must be positive")]
     public decimal OtherAllowances { get; set; }
+    public decimal CTC { get; set; }
+
+    // Deduction Details
+    public decimal PF { get; set; }
+    public decimal ESI { get; set; }
+    public decimal ProfessionalTax { get; set; }
+    public decimal TDS { get; set; }
+    public decimal OtherDeductions { get; set; }
 
     // Offer Details
     [Required(ErrorMessage = "Joining date is required")]
@@ -58,4 +66,8 @@ public class CreateOfferLetterDto
 
     [StringLength(1000, ErrorMessage = "Additional terms cannot exceed 1000 characters")]
     public string? AdditionalTerms { get; set; }
+
+    // Linkage (WP3)
+    public int? EmployeeId { get; set; }
+    public int? TemplateId { get; set; }
 }

@@ -1,0 +1,89 @@
+@model HRMS.Application.DTOs.Leave.CreateLeaveRequestDto
+@{
+    ViewData["Title"] = "Create Leave Request";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">New Leave Request</h1>
+    <a asp-action="Index" class="btn btn-secondary shadow-sm">
+        <i class="bi bi-arrow-left"></i> Back to List
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Leave Request Details</h6>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="mb-3">
+                        <label for="employeeId" class="form-label">Employee</label>
+                        <select name="employeeId" class="form-select" asp-items="ViewBag.Employees">
+                            <option value="">-- Select Employee --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="LeaveTypeId" class="form-label">Leave Type</label>
+                        <select asp-for="LeaveTypeId" class="form-select" asp-items="ViewBag.LeaveTypes">
+                            <option value="">-- Select Leave Type --</option>
+                        </select>
+                        <span asp-validation-for="LeaveTypeId" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="StartDate" class="form-label">Start Date</label>
+                            <input asp-for="StartDate" class="form-control" type="date" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="EndDate" class="form-label">End Date</label>
+                            <input asp-for="EndDate" class="form-control" type="date" />
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Reason" class="form-label">Reason</label>
+                        <textarea asp-for="Reason" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Reason" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Submit Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-info text-white">
+                <h6 class="m-0 font-weight-bold"><i class="bi bi-info-circle"></i> Instructions</h6>
+            </div>
+            <div class="card-body">
+                <p>Use this form to raise a leave request on behalf of an employee.</p>
+                <ul>
+                    <li>Select the employee and leave type.</li>
+                    <li>Ensure dates are correct.</li>
+                    <li>Provide a clear reason for the leave.</li>
+                </ul>
+                <div class="alert alert-warning">
+                    <small><i class="bi bi-exclamation-triangle"></i> Submitting this request will automatically notify the employee and their manager.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

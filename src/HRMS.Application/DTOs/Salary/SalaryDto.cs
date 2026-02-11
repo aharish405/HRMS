@@ -29,6 +29,10 @@ public class SalaryDto
     public DateTime? EffectiveTo { get; set; }
     public bool IsActive { get; set; }
 
+    // Enterprise Flow Fields
+    public int? OfferLetterId { get; set; }
+    public bool IsSystemGenerated { get; set; }
+
     public DateTime CreatedOn { get; set; }
     public string CreatedBy { get; set; } = string.Empty;
 }

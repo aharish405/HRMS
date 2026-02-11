@@ -24,7 +24,14 @@ public class EmployeeDto
 
     public DateTime JoiningDate { get; set; }
     public DateTime? RelievingDate { get; set; }
-    public string Status { get; set; } = string.Empty;
+    public int Status { get; set; }  // 0=Draft, 1=Active, 2=OnNotice, 3=Relieved, 4=Terminated
+
+    // KYC Details
+    public string PanNumber { get; set; } = string.Empty;
+    public string AadharNumber { get; set; } = string.Empty;
+    public string? BloodGroup { get; set; }
+    public string? EmergencyContactName { get; set; }
+    public string? EmergencyContactPhone { get; set; }
 
     public DateTime CreatedOn { get; set; }
     public string CreatedBy { get; set; } = string.Empty;

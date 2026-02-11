@@ -3,9 +3,10 @@
     ViewData["Title"] = "Offer Letter Details";
 }
 
+
 <div class="row mb-3">
     <div class="col-md-8">
-        <h2><i class="bi bi-file-earmark-text"></i> Offer Letter Details</h2>
+        <h2><i class="bi bi-file-earmark-text"></i> Offer Letter: @Model.CandidateName</h2>
     </div>
     <div class="col-md-4 text-end">
         <form asp-action="DownloadPdf" method="get" class="d-inline" target="_blank">
@@ -75,6 +76,7 @@
                 <h5 class="mb-0"><i class="bi bi-currency-rupee"></i> Compensation Details</h5>
             </div>
             <div class="card-body">
+                <h6 class="text-muted">Allowances</h6>
                 <table class="table table-sm">
                     <tr>
                         <td>Basic Salary</td>
@@ -104,8 +106,67 @@
                         </tr>
                     }
                     <tr class="table-success">
-                        <td><strong>Total Annual CTC</strong></td>
+                        <td><strong>Gross Salary (Annual)</strong></td>
+                        <td class="text-end"><strong>₹@Model.GrossSalary.ToString("N2")</strong></td>
+                    </tr>
+                </table>
+
+                <h6 class="text-muted mt-3">Deductions</h6>
+                <table class="table table-sm">
+                    @if (Model.PF > 0)
+                    {
+                        <tr>
+                            <td>PF (Provident Fund)</td>
+                            <td class="text-end">₹@Model.PF.ToString("N2")</td>
+                        </tr>
+                    }
+                    @if (Model.ESI > 0)
+                    {
+                        <tr>
+                            <td>ESI (Employee State Insurance)</td>
+                            <td class="text-end">₹@Model.ESI.ToString("N2")</td>
+                        </tr>
+                    }
+                    @if (Model.ProfessionalTax > 0)
+                    {
+                        <tr>
+                            <td>Professional Tax</td>
+                            <td class="text-end">₹@Model.ProfessionalTax.ToString("N2")</td>
+                        </tr>
+                    }
+                    @if (Model.TDS > 0)
+                    {
+                        <tr>
+                            <td>TDS</td>
+                            <td class="text-end">₹@Model.TDS.ToString("N2")</td>
+                        </tr>
+                    }
+                    @if (Model.OtherDeductions > 0)
+                    {
+                        <tr>
+                            <td>Other Deductions</td>
+                            <td class="text-end">₹@Model.OtherDeductions.ToString("N2")</td>
+                        </tr>
+                    }
+                    <tr class="table-danger">
+                        <td><strong>Total Deductions</strong></td>
+                        <td class="text-end"><strong>₹@Model.TotalDeductions.ToString("N2")</strong></td>
+                    </tr>
+                </table>
+
+                <h6 class="text-muted mt-3">Summary</h6>
+                <table class="table table-sm">
+                    <tr class="table-primary">
+                        <td><strong>Total CTC (Annual)</strong></td>
                         <td class="text-end"><strong>₹@Model.CTC.ToString("N2")</strong></td>
+                    </tr>
+                    <tr class="table-info">
+                        <td><strong>Net Salary (Annual)</strong></td>
+                        <td class="text-end"><strong>₹@Model.NetSalary.ToString("N2")</strong></td>
+                    </tr>
+                    <tr class="table-warning">
+                        <td><strong>Net Salary (Monthly)</strong></td>
+                        <td class="text-end"><strong>₹@((Model.NetSalary / 12).ToString("N2"))</strong></td>
                     </tr>
                 </table>
             </div>
@@ -151,6 +212,34 @@
                     }
                 </h3>
                 <hr />
+
+                @* Accept Offer Button - Only for Sent status and Linked Employee *@
+                @if (Model.Status.ToString() == "Sent" && Model.EmployeeId != null)
+                {
+                    <div class="alert alert-info mb-3">
+                        <i class="bi bi-info-circle"></i> This offer can be accepted to create employee record
+                    </div>
+                    <form asp-action="Accept" method="post" class="mb-3"
+                        onsubmit="return confirm('Accept this offer and create employee record for @Model.CandidateName?');">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-success w-100 mb-2">
+                            <i class="bi bi-check-circle"></i> Accept Offer & Create Employee
+                        </button>
+                    </form>
+                }
+
+                @* Show employee link if already accepted *@
+                @if (Model.Status.ToString() == "Accepted" && Model.EmployeeId != null)
+                {
+                    <div class="alert alert-success mb-3">
+                        <i class="bi bi-check-circle"></i> Offer accepted - Employee created
+                    </div>
+                    <a asp-area="Admin" asp-controller="Employee" asp-action="Details" asp-route-id="@Model.EmployeeId"
+                        class="btn btn-primary w-100 mb-2">
+                        <i class="bi bi-person"></i> View Employee Record
+                    </a>
+                }
+
                 <form asp-action="UpdateStatus" method="post" class="mb-2">
                     <input type="hidden" name="id" value="@Model.Id" />
                     <select name="status" class="form-select mb-2">

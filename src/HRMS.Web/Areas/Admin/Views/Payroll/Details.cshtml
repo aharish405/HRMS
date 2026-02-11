@@ -49,9 +49,37 @@
 
         <div class="card mb-3">
             <div class="card-header bg-info text-white">
-                <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Attendance Summary</h5>
+                <h5 class="mb-0">
+                    <i class="bi bi-calendar-check"></i> Attendance & Calculation
+                    @if(Model.IsProRated)
+                    {
+                         <span class="badge bg-warning text-dark float-end">Pro-Rated</span>
+                    }
+                </h5>
             </div>
             <div class="card-body">
+                <div class="row text-center mb-3">
+                    <div class="col-md-3">
+                        <h6 class="text-muted">Calendar Days</h6>
+                        <h3>@Model.TotalCalendarDays</h3>
+                    </div>
+                     <div class="col-md-3">
+                        <h6 class="text-muted">Paid Days</h6>
+                        <h3 class="text-primary">@Model.PaidDays</h3>
+                    </div>
+                    <div class="col-md-3">
+                        <h6 class="text-muted">Daily Rate</h6>
+                        <h3>₹@Model.PerDaySalary.ToString("N2")</h3>
+                    </div>
+                    @if(Model.JoiningDate.HasValue)
+                    {
+                        <div class="col-md-3">
+                            <h6 class="text-muted">Joined On</h6>
+                            <h5>@Model.JoiningDate.Value.ToString("dd MMM")</h5>
+                        </div>
+                    }
+                </div>
+                <hr/>
                 <div class="row text-center">
                     <div class="col-md-3">
                         <h6 class="text-muted">Working Days</h6>

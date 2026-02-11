@@ -118,6 +118,12 @@ public class OfferLetterController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateStatus(int id, int status)
     {
+        // If status is Accepted (3), redirect to Accept logic
+        if ((OfferLetterStatus)status == OfferLetterStatus.Accepted)
+        {
+            return await Accept(id);
+        }
+
         var result = await _offerLetterService.UpdateOfferLetterStatusAsync(id, (OfferLetterStatus)status, User.Identity!.Name!);
 
         if (!result.Success)
@@ -130,6 +136,34 @@ public class OfferLetterController : Controller
         }
 
         return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Accept(int id)
+    {
+        try
+        {
+            var result = await _offerLetterService.AcceptOfferAndCreateEmployeeAsync(id, User.Identity!.Name!);
+
+            if (!result.Success)
+            {
+                TempData["ErrorMessage"] = result.Message;
+                _logger.LogWarning("Failed to accept offer {OfferId}: {Message}", id, result.Message);
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            TempData["SuccessMessage"] = result.Message + $" Employee ID: {result.Data!.Id}";
+            _logger.LogInformation("Successfully accepted offer {OfferId}, created employee {EmployeeId}", id, result.Data.Id);
+
+            return RedirectToAction("Details", "Employee", new { area = "Admin", id = result.Data!.Id });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception in Accept action for offer {OfferId}", id);
+            TempData["ErrorMessage"] = $"An error occurred: {ex.Message}";
+            return RedirectToAction(nameof(Details), new { id });
+        }
     }
 
     [HttpPost]
@@ -154,11 +188,36 @@ public class OfferLetterController : Controller
     {
         var departmentRepo = _unitOfWork.Repository<Domain.Entities.Department>();
         var designationRepo = _unitOfWork.Repository<Domain.Entities.Designation>();
+        var templateRepo = _unitOfWork.Repository<Domain.Entities.OfferLetterTemplate>();
+        var employeeRepo = _unitOfWork.Repository<Domain.Entities.Employee>();
 
         var departments = await departmentRepo.FindAsync(d => d.IsActive);
         var designations = await designationRepo.FindAsync(d => d.IsActive);
+        var templates = await templateRepo.FindAsync(t => t.IsActive && !t.IsDeleted);
+        var employees = await employeeRepo.FindAsync(e => e.Status == EmployeeStatus.Draft && !e.IsDeleted);
 
         ViewBag.Departments = new SelectList(departments, "Id", "Name");
         ViewBag.Designations = new SelectList(designations, "Id", "Title");
+        ViewBag.Templates = new SelectList(templates, "Id", "Name");
+        ViewBag.Employees = new SelectList(employees.Select(e => new { 
+            Id = e.Id, 
+            DisplayText = $"{e.FirstName} {e.LastName} ({e.EmployeeCode})" 
+        }), "Id", "DisplayText");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetEmployeeDetails(int id)
+    {
+        var employee = await _unitOfWork.Repository<Domain.Entities.Employee>().GetByIdAsync(id);
+        if (employee == null) return NotFound();
+
+        return Json(new {
+            candidateName = $"{employee.FirstName} {employee.LastName}",
+            candidateEmail = employee.Email,
+            candidatePhone = employee.Phone,
+            candidateAddress = employee.Address,
+            departmentId = employee.DepartmentId,
+            designationId = employee.DesignationId
+        });
     }
 }
