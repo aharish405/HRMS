@@ -2,9 +2,19 @@
 @inject SignInManager<HRMS.Infrastructure.Identity.ApplicationUser> SignInManager
 @inject UserManager<HRMS.Infrastructure.Identity.ApplicationUser> UserManager
 
+@{
+    var controller = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var area = ViewContext.RouteData.Values["Area"]?.ToString();
+
+    // Active state checks
+    var workforceActive = controller == "Employee" || controller == "OfferLetter" || controller == "OfferLetterTemplate";
+    var financeActive = controller == "Payroll" || controller == "Salary";
+    var masterActive = controller == "Department" || controller == "Designation";
+}
+
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header py-4">
-        <a asp-controller="Home" asp-action="Index" class="sidebar-brand d-flex align-items-center">
+        <a asp-area="" asp-controller="Home" asp-action="Index" class="sidebar-brand d-flex align-items-center">
             <div class="bg-white rounded-circle p-1 me-2 d-flex align-items-center justify-content-center shadow-sm"
                 style="width: 40px; height: 40px;">
                 <img src="~/images/logo-icon.png" alt="WorkAxis Icon" height="28">
@@ -19,71 +29,94 @@
 
             <li class="sidebar-item">
                 <a asp-area="" asp-controller="Home" asp-action="Index"
-                    class="sidebar-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")">
+                    class="sidebar-link @(controller == "Home" ? "active" : "")">
                     <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
                 </a>
             </li>
 
             @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin") || User.IsInRole("HRAdmin"))
             {
-                <li class="sidebar-header-label">Workforce</li>
+                <li class="sidebar-header-label">Management</li>
 
+                <!-- Workforce Menu -->
                 <li class="sidebar-item">
-                    <a asp-area="Admin" asp-controller="Employee" asp-action="Index"
-                        class="sidebar-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Employee" ? "active" : "")">
-                        <i class="bi bi-person-badge"></i> <span>Employees</span>
+                    <a class="sidebar-link @(workforceActive ? "" : "collapsed")" data-bs-toggle="collapse" href="#workforceSubmenu" 
+                       role="button" aria-expanded="@(workforceActive ? "true" : "false")" aria-controls="workforceSubmenu">
+                        <i class="bi bi-person-badge"></i> <span>Workforce</span>
                     </a>
-                </li>
-                <li class="sidebar-item">
-                    <a asp-area="Admin" asp-controller="OfferLetter" asp-action="Index"
-                        class="sidebar-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "OfferLetter" ? "active" : "")">
-                        <i class="bi bi-file-earmark-text"></i> <span>Offer Letters</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a asp-area="Admin" asp-controller="OfferLetterTemplate" asp-action="Index"
-                        class="sidebar-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "OfferLetterTemplate" ? "active" : "")">
-                        <i class="bi bi-file-earmark-richtext"></i> <span>Offer Templates</span>
-                    </a>
-                </li>
-
-                <li class="sidebar-header-label">Payroll & Finance</li>
-
-                <li class="sidebar-item">
-                    <a asp-area="Admin" asp-controller="Payroll" asp-action="Index"
-                        class="sidebar-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Payroll" ? "active" : "")">
-                        <i class="bi bi-cash-stack"></i> <span>Payroll</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a asp-area="Admin" asp-controller="Salary" asp-action="Index"
-                        class="sidebar-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Salary" ? "active" : "")">
-                        <i class="bi bi-currency-dollar"></i> <span>Salary Structures</span>
-                    </a>
+                    <ul class="collapse sidebar-submenu @(workforceActive ? "show" : "")" id="workforceSubmenu">
+                        <li>
+                            <a asp-area="Admin" asp-controller="Employee" asp-action="Index"
+                                class="sidebar-link @(controller == "Employee" ? "active" : "")">
+                                <span>Employees</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="Admin" asp-controller="OfferLetter" asp-action="Index"
+                                class="sidebar-link @(controller == "OfferLetter" ? "active" : "")">
+                                <span>Offer Letters</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="Admin" asp-controller="OfferLetterTemplate" asp-action="Index"
+                                class="sidebar-link @(controller == "OfferLetterTemplate" ? "active" : "")">
+                                <span>Offer Templates</span>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
 
-                <li class="sidebar-header-label">Leave Management</li>
+                <!-- Payroll & Finance Menu -->
+                <li class="sidebar-item">
+                    <a class="sidebar-link @(financeActive ? "" : "collapsed")" data-bs-toggle="collapse" href="#financeSubmenu" 
+                       role="button" aria-expanded="@(financeActive ? "true" : "false")" aria-controls="financeSubmenu">
+                        <i class="bi bi-cash-stack"></i> <span>Payroll & Finance</span>
+                    </a>
+                    <ul class="collapse sidebar-submenu @(financeActive ? "show" : "")" id="financeSubmenu">
+                        <li>
+                            <a asp-area="Admin" asp-controller="Payroll" asp-action="Index"
+                                class="sidebar-link @(controller == "Payroll" ? "active" : "")">
+                                <span>Payroll</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="Admin" asp-controller="Salary" asp-action="Index"
+                                class="sidebar-link @(controller == "Salary" ? "active" : "")">
+                                <span>Salary Structures</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
 
                 <li class="sidebar-item">
                     <a asp-area="Admin" asp-controller="Leave" asp-action="Index"
-                        class="sidebar-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Leave" ? "active" : "")">
+                        class="sidebar-link @(controller == "Leave" ? "active" : "")">
                         <i class="bi bi-calendar-check"></i> <span>Leave Requests</span>
                     </a>
                 </li>
 
-                <li class="sidebar-header-label">Master Data</li>
+                <li class="sidebar-header-label">Organization</li>
 
+                <!-- Master Data Menu -->
                 <li class="sidebar-item">
-                    <a asp-area="Admin" asp-controller="Department" asp-action="Index"
-                        class="sidebar-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Department" ? "active" : "")">
-                        <i class="bi bi-building"></i> <span>Departments</span>
+                    <a class="sidebar-link @(masterActive ? "" : "collapsed")" data-bs-toggle="collapse" href="#masterSubmenu" 
+                       role="button" aria-expanded="@(masterActive ? "true" : "false")" aria-controls="masterSubmenu">
+                        <i class="bi bi-grid-3x3-gap"></i> <span>Master Data</span>
                     </a>
-                </li>
-                <li class="sidebar-item">
-                    <a asp-area="Admin" asp-controller="Designation" asp-action="Index"
-                        class="sidebar-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Designation" ? "active" : "")">
-                        <i class="bi bi-briefcase"></i> <span>Designations</span>
-                    </a>
+                    <ul class="collapse sidebar-submenu @(masterActive ? "show" : "")" id="masterSubmenu">
+                        <li>
+                            <a asp-area="Admin" asp-controller="Department" asp-action="Index"
+                                class="sidebar-link @(controller == "Department" ? "active" : "")">
+                                <span>Departments</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="Admin" asp-controller="Designation" asp-action="Index"
+                                class="sidebar-link @(controller == "Designation" ? "active" : "")">
+                                <span>Designations</span>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             }
 
@@ -93,25 +126,25 @@
 
                 <li class="sidebar-item">
                     <a asp-area="Employee" asp-controller="Dashboard" asp-action="Index"
-                        class="sidebar-link @(ViewContext.RouteData.Values["Area"]?.ToString() == "Employee" && ViewContext.RouteData.Values["Controller"]?.ToString() == "Dashboard" ? "active" : "")">
+                        class="sidebar-link @(area == "Employee" && controller == "Dashboard" ? "active" : "")">
                         <i class="bi bi-speedometer2"></i> <span>Overview</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
                     <a asp-area="Employee" asp-controller="Profile" asp-action="Index"
-                        class="sidebar-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Profile" ? "active" : "")">
+                        class="sidebar-link @(controller == "Profile" ? "active" : "")">
                         <i class="bi bi-person-circle"></i> <span>My Profile</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
                     <a asp-area="Employee" asp-controller="MyPayslips" asp-action="Index"
-                        class="sidebar-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "MyPayslips" ? "active" : "")">
+                        class="sidebar-link @(controller == "MyPayslips" ? "active" : "")">
                         <i class="bi bi-receipt"></i> <span>My Payslips</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
                     <a asp-area="Employee" asp-controller="MyLeaves" asp-action="Index"
-                        class="sidebar-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "MyLeaves" ? "active" : "")">
+                        class="sidebar-link @(controller == "MyLeaves" ? "active" : "")">
                         <i class="bi bi-calendar2-week"></i> <span>My Leaves</span>
                     </a>
                 </li>

@@ -23,9 +23,11 @@
             max-width: 440px;
             padding: 44px;
             background-color: #fff;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f1f5f9;
             position: relative;
             min-height: 380px;
+            border-radius: 4px;
         }
 
         .logo {
@@ -58,8 +60,8 @@
 <body>
     <div class="login-container">
         <div class="logo d-flex align-items-center justify-content-center">
-            <img src="~/images/logo-icon.png" alt="WorkAxis Logo" height="40" class="me-2">
-            <span>WorkAxis</span>
+            <img src="~/images/logo-icon.png" alt="WorkAxis Logo" height="40" class="me-2 rounded-1">
+            <span class="text-dark">WorkAxis</span>
         </div>
         @RenderBody()
     </div>

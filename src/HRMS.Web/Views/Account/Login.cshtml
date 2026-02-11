@@ -164,7 +164,7 @@
         <p class="mb-4">to continue to WorkAxis</p>
 
         <div class="mb-3">
-            <input asp-for="Email" class="form-control" placeholder="Email, phone, or Skype" id="emailInput"
+            <input asp-for="Email" class="form-control" placeholder="Email" id="emailInput"
                 autocomplete="off" />
             <span asp-validation-for="Email" class="text-danger small"></span>
             <div id="emailError" class="text-danger small mt-1" style="display:none">Please enter a valid email address.
@@ -212,11 +212,7 @@
     </div>
 </form>
 
-<div class="mt-4 pt-3 text-center border-top">
-    <small class="text-muted" style="font-size: 11px;">
-        Use: admin@workaxis.com / Admin@12345
-    </small>
-</div>
+
 
 @section Scripts {
     <script>
